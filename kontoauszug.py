@@ -24,7 +24,13 @@ if len(dirs) > 1:
     print('\n!!Vorsicht mehrere ergebnisse gefunden!!\n')
     for dir in dirs:
         print(dir)
-    print('\nnehme jetzt "{}"\n'.format(path))
+    print('\nwelcher soll genommen werden? bei ENTER wird der erste genommen')
+
+    dir = input()
+    if dir == '':
+        print('\nnehme jetzt "{}"\n'.format(path))
+    else:
+        path = dir
 
 
 class kto_ausz_Parser(object):
@@ -165,3 +171,5 @@ if __name__ == '__main__':
         parsed_kto_ausz = kto_ausz_Parser(content)
         parsed_kto_ausz.to_tsv(mode=mode)
         print('\n{} --> {} Buchungszeilen'.format(name, parsed_kto_ausz.num_rows))
+
+print('fertig')
