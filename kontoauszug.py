@@ -22,10 +22,9 @@ class kto_ausz_Parser(object):
         self.rows = []
         self.num_rows = self.__get_num_rows()
         for i in range(self.num_rows):
-            row = ()
-            row += self.__parse_date()
-            row += (self.__parse_description(),)
-            row += (self.__parse_amount(),)
+            row = self.__parse_date()
+            row += self.__parse_description()
+            row += self.__parse_amount()
             self.rows.append(row)
 
     def __parse_date(self):
@@ -48,7 +47,7 @@ class kto_ausz_Parser(object):
             if ' ' in self.__content[i] and space:
                 description = self.__content[:i].strip()
                 self.__content = self.__content[i:].strip()
-                return description
+                return (description,)
             elif ' ' in self.__content[i]:
                 space = True
             else:
@@ -59,7 +58,7 @@ class kto_ausz_Parser(object):
             if '+' in self.__content[i] or '-' in self.__content[i]:
                 amount = self.__content[:i+1].strip()
                 self.__content = self.__content[i+1:]
-                return amount
+                return (amount,)
 
     def __get_num_rows(self):
         count = 0
