@@ -3,36 +3,14 @@ from datetime import datetime
 import os
 
 location = os.path.dirname(os.path.abspath(__file__))
-for _ in range(100):
-    print('')
-
-
+#-------------------------------------------------------------------------------
 def find_all(name):
     result = []
     for root, dirs, files in os.walk(location):
         if name in dirs:
             result.append(os.path.join(root, name))
     return result
-
-
-print('ordnernamen eingeben: ')
-dir = input()
-dirs = find_all(dir)
-
-path = dirs[0]
-if len(dirs) > 1:
-    print('\n!!Vorsicht mehrere ergebnisse gefunden!!\n')
-    for dir in dirs:
-        print(dir)
-    print('\nwelcher soll genommen werden? bei ENTER wird der erste genommen')
-
-    dir = input()
-    if dir == '':
-        print('\nnehme jetzt "{}"\n'.format(path))
-    else:
-        path = dir
-
-
+#-------------------------------------------------------------------------------
 class kto_ausz_Parser(object):
     def __init__(self, content):
         self.__content = content
@@ -116,8 +94,32 @@ class kto_ausz_Parser(object):
                     else:
                         f.write(value+'\t')
 
-
+#-------------------------------------------------------------------------------
 if __name__ == '__main__':
+    for _ in range(100):
+        print('')
+        
+    print('ordnernamen eingeben: ')
+    dir = input()
+    dirs = find_all(dir)
+
+    try:
+        path = dirs[0]
+    except:
+        print('Ordner "{}" nicht gefunden!'.format(dir))
+
+    if len(dirs) > 1:
+        print('\n!!Vorsicht mehrere ergebnisse gefunden!!\n')
+        for dir in dirs:
+            print(dir)
+        print('\nwelcher soll genommen werden? bei ENTER wird der erste genommen')
+
+        dir = input()
+        if dir != '':
+            path = dir
+        
+    print('\nnehme jetzt "{}"\n'.format(path))
+#-------------------------------------------------------------------------------
     print('tippe "hilfe" ein fuer eine liste von kommandos:')
     args = input()
     if 'hilfe' in args:
@@ -132,6 +134,7 @@ if __name__ == '__main__':
 
     list_of_files = [name for name in os.listdir(path) if name.endswith(".PDF")]
     if 'liste' in args:
+        print('LISTE aller PDF dateien im ordner "{}"'. format(path.split('/')[-1]))
         for file in list_of_files:
             print(file)
 
@@ -156,9 +159,13 @@ if __name__ == '__main__':
     else:
         with open(path+'/kontoauszug.tsv', 'w') as f:
             pass
-
-    for name in pdf_names:
-        pdf_file = open(path + '/' + name, 'rb')
+#-------------------------------------------------------------------------------    
+    print('\n')
+    for name in set(pdf_names):
+        try:
+            pdf_file = open(path + '/' + name, 'rb')
+        except:
+            print('Datei "{}" wurde nicht gefunden!'.format(name))
         read_pdf = PyPDF2.PdfFileReader(pdf_file)
         number_of_pages = read_pdf.getNumPages()
 
@@ -170,6 +177,6 @@ if __name__ == '__main__':
 
         parsed_kto_ausz = kto_ausz_Parser(content)
         parsed_kto_ausz.to_tsv(mode=mode)
-        print('\n{} --> {} Buchungszeilen'.format(name, parsed_kto_ausz.num_rows))
+        print('{} --> {} Buchungszeilen'.format(name, parsed_kto_ausz.num_rows))
 
-print('fertig')
+print('\nfertig')
