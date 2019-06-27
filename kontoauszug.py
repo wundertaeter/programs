@@ -25,7 +25,6 @@ class kto_ausz_Parser(object):
             row = ((self.__parse_date(),
                     self.__parse_description(),
                     self.__parse_amount()))
-
             self.rows.append()
 
     def __parse_date(self):
