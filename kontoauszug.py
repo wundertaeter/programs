@@ -22,9 +22,10 @@ class kto_ausz_Parser(object):
         self.rows = []
         self.num_rows = self.__get_num_rows()
         for i in range(self.num_rows):
-            row = (self.__parse_date(),
-                    self.__parse_description(),
-                    self.__parse_amount())
+            row = ()
+            row += self.__parse_date()
+            row += (self.__parse_description(),)
+            row += (self.__parse_amount(),)
             self.rows.append(row)
 
     def __parse_date(self):
