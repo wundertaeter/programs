@@ -87,8 +87,8 @@ class kto_ausz_Parser(object):
     def print(self):
         for row in self.rows:
             print(' -----------------------------------------------------------------------------------------------')
-            print('|\t{}\t|\t{}\t|\t{}\t|\t{}\t|'.format(row[0], row[1], (row[2][:10]+'...'
-                                                                          + row[2][-10:]), row[3]))
+            print('|\t{}\t|\t{}\t|\t{}\t|\t{}\t|'.format(row[0], row[1],
+                                                         (row[2][:10]+'...' + row[2][-10:]), row[3]))
 
     def to_tsv(self, name='kontoauszug.tsv', mode='w'):
         if not 'w' in mode and not 'a' in mode:
