@@ -17,29 +17,30 @@ def find_all(name):
 
 
 class kto_ausz_Parser(object):
-    def __init__(self, content):
+    def __init__(self, content, format_in='%d.%m.%Y', format_out='%d.%m.%Y'):
         self.__content = content
         self.rows = []
         self.num_rows = self.__get_num_rows()
         for i in range(self.num_rows):
-            row = self.__parse_date()
+            row = self.__parse_date(format_in, format_out)
             row += self.__parse_description()
             row += self.__parse_amount()
             self.rows.append(row)
 
-    def __parse_date(self):
+    def __parse_date(self, format_in, format_out):
         found = False
         for i in range(len(self.__content) - 10):
             try:
-                date1 = datetime.strptime(self.__content[i:i+10], '%d.%m.%Y').date()
-                date2 = datetime.strptime(self.__content[i+10:i+20], '%d.%m.%Y').date()
+                date1 = datetime.strptime(self.__content[i:i+10], format_in).date()
+                date2 = datetime.strptime(self.__content[i+10:i+20], format_in).date()
                 found = True
             except:
                 pass
 
             if found:
                 self.__content = self.__content[i+20:].strip()
-                return (str(date1), str(date2))
+                return (datetime.strftime(date1, format_out),
+                        datetime.strftime(date2, format_out))
 
     def __parse_description(self):
         space = False
