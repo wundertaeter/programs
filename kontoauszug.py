@@ -17,7 +17,7 @@ def find_all(name):
 
 
 class kto_ausz_Parser(object):
-    def __init__(self, content, format_in='%d.%m.%Y', format_out='%d.%m.%Y'):
+    def __init__(self, content, format_in, format_out):
         self.__content = content
         self.rows = []
         self.num_rows = self.__get_num_rows()
@@ -190,7 +190,7 @@ if __name__ == '__main__':
             page_content = page.extractText()
             content += page_content
 
-        parsed_kto_ausz = kto_ausz_Parser(content)
+        parsed_kto_ausz = kto_ausz_Parser(content, '%d.%m.%Y', '%d.%m.%Y')
         parsed_kto_ausz.to_tsv(mode=mode)
         print('{} --> {} Buchungszeilen'.format(name, parsed_kto_ausz.num_rows))
         parsed_kto_ausz.print()
