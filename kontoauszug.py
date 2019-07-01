@@ -36,7 +36,7 @@ class kto_ausz_Parser(object):
                 date2 = datetime.strptime(self.__content[i+10:i+20], format_in).date()
                 found = True
             except:
-                pass
+                pass 
 
             if found:
                 self.__content = self.__content[i+20:].strip()
