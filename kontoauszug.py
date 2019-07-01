@@ -186,8 +186,8 @@ class gui(object):
             if len(path) > 0:
                 path = path[0]
                 self.list_of_files = [name for name in os.listdir(path) if name.endswith(".PDF")]
-                choices = self.list_of_files
-                choices.append('Alle')
+                choices = ['Alle']
+                choices.extend(self.list_of_files)
                 # Add a grid
                 self.mainframe = Frame(self.fenster)
                 self.mainframe.grid(column=2, row=0, sticky=(N, W, E, S))
@@ -202,7 +202,7 @@ class gui(object):
 
                 self.tkvar.set('Files')  # set the default option
                 self.popupMenu = OptionMenu(self.mainframe, self.tkvar, *choices)
-                Label(self.mainframe, text="Choose a File").grid(row=1, column=1)
+                Label(self.mainframe, text="Datei auswählen").grid(row=1, column=1)
                 self.popupMenu.grid(row=4, column=1)
 
                 # on change dropdown value
