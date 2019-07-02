@@ -239,7 +239,7 @@ class gui(object):
         my_label.grid(row=0, column=0)
         self.eingabefeld.grid(row=0, column=1)
         self.welcom_button.grid(row=1, column=1)
-        next_site.grid(row=2, column=3)
+        next_site.grid(row=2, column=2)
         previous_site.grid(row=2, column=0)
         self.welcome_label.grid(row=3, column=0, columnspan=2)
 
