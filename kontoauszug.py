@@ -5,8 +5,10 @@ from datetime import datetime
 import os
 
 #----Install------#
+#download file
+#move file to home
 #cd ~/
-#curl -o .kontoauszug.py https://github.com/wundertaeter/programs/blob/master/kontoauszug.py
+#mv kontoauszug.py .kontoauszug.py
 #echo ~/.kontoauszug.py > /Applications/kontoauszug.command
 #chmod 744 /Applications/kontoauszug.command
 #-----------------#
