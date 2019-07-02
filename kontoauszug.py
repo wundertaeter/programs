@@ -20,7 +20,6 @@ def find_all(name):
         for dir in dirs:
             if name.strip() in dir.strip():
                 result.append(os.path.join(root, dir))
-                print(os.path.join(root, dir))
     return result
 # -------------------------------------------------------------------------------
 
@@ -193,7 +192,6 @@ class gui(object):
             path = find_all(dir)
             if len(path) > 0:
                 path = path[0]
-                print(path)
                 self.list_of_files = [name for name in os.listdir(path) if name.endswith(".PDF")]
                 print(self.list_of_files)
                 choices = ['Alle']
