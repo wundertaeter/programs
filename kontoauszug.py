@@ -102,14 +102,14 @@ class kto_ausz_Parser(object):
     def to_sites(self, name):
         i = 0
         sites = []
-        s = '\t{} --> {} Buchungszeilen\n'.format(name, self.num_rows)
+        s = '{} --> {} Buchungszeilen\n'.format(name, self.num_rows)
         for row in self.rows:
-            s += '\t -------------------------------------------------------------------------------------------------------------------------------------\n'
-            s += '\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\n'.format(row[0], row[1],
-                                                            (row[2][:10]+'...' + row[2][-10:]), row[3])
+            s += ' -------------------------------------------------------------------------------------------------------------------------------------\n'
+            s += '|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\n'.format(row[0], row[1],
+                                                          (row[2][:10]+'...' + row[2][-10:]), row[3])
             i += 1
             if i % 20 == 0:
-                s += '\t -------------------------------------------------------------------------------------------------------------------------------------\n'
+                s += ' -------------------------------------------------------------------------------------------------------------------------------------\n'
                 sites.append(s)
                 s = ''
         if s != '':
@@ -184,31 +184,27 @@ class gui(object):
             self.i -= 1
         self.welcome_label.config(text=self.sites[self.i])
 
-    def create_drob_down(self, list_of_names, column, row, start='', lable=''):
+    def create_drob_down(self, list_of_names, row, start='', headline='', lable=''):
         choices = []
         if len(start) > 0:
             choices.append(start)
         choices.extend(list_of_names)
         # Add a grid
         self.mainframe = Frame(self.fenster)
-        self.mainframe.grid(column=column, row=row, sticky=(N, W, E, S))
-        self.mainframe.columnconfigure(0, weight=1)
-        self.mainframe.rowconfigure(0, weight=1)
-        # mainframe.pack(pady=100, padx=100)
+        self.mainframe.grid(column=2, row=row, sticky=(N, W, E, S))
 
         # Create a Tkinter variable
         self.tkvar = StringVar(self.fenster)
 
         # Dictionary with options
 
-        self.tkvar.set('Files')  # set the default option
+        self.tkvar.set(lable)  # set the default option
         self.popupMenu = OptionMenu(self.mainframe, self.tkvar, *choices)
-        Label(self.mainframe, text=lable).grid(row=1, column=1)
-        self.popupMenu.grid(row=row, column=column)
+        Label(self.mainframe, text=headline).grid(row=1, column=1)
+        self.popupMenu.grid(column=3, row=1)
 
     def search(self, find=True):
         dir = self.search_field.get()
-
         if (dir == ''):
             self.welcome_label.config(text='Bitte zuerst Ordnernamen eingeben')
         else:
@@ -219,9 +215,10 @@ class gui(object):
             elif len(self.paths) == 1:
                 self.welcome_label.config(text='')
                 path = self.paths[0]
+                self.create_drob_down([path], row=0, headline='Ordner auswählen', lable=path)
                 self.list_of_files = [name for name in os.listdir(path) if name.endswith('.PDF')]
-                self.create_drob_down(self.list_of_files, column=3, row=1,
-                                      start='Alle', lable='Datei auswählen')
+                self.create_drob_down(self.list_of_files, row=1, start='Alle',
+                                      headline='Datei auswählen', lable='Dateien')
 
                 # on change dropdown value
                 def change_dropdown(*args):
@@ -241,9 +238,10 @@ class gui(object):
                 # link function to change dropdown
                 self.tkvar.trace('w', change_dropdown)
             else:
-                text = '\t\t\tMehrere Ordner gefunden!! Bitte einen auswählen: '
+                text = '\t\t\tMehrere Ordner gefunden!!'
                 self.welcome_label.config(text=text)
-                self.create_drob_down(self.paths, column=3, row=0, lable='Ordner wählen')
+                self.create_drob_down(
+                    self.paths, row=0, headline='Ordner auswählen', lable='Ordner')
 
                 def change_dropdown_dirs(*args):
                     self.paths = [self.tkvar.get()]
