@@ -193,7 +193,9 @@ class gui(object):
             path = find_all(dir)
             if len(path) > 0:
                 path = path[0]
+                print(path)
                 self.list_of_files = [name for name in os.listdir(path) if name.endswith(".PDF")]
+                print(self.list_of_files)
                 choices = ['Alle']
                 choices.extend(self.list_of_files)
                 # Add a grid
