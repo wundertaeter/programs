@@ -7,7 +7,7 @@ import os
 #cd ~/
 #curl -o .kontoauszug.py https://github.com/wundertaeter/programs/blob/master/kontoauszug.py
 
-
+os.path.join(os.path.dirname(__file__))
 location = os.path.dirname(os.path.abspath(__file__))
 # -------------------------------------------------------------------------------
 
@@ -220,10 +220,11 @@ class gui(object):
                     self.sites = convert(list_of_files, path)
                     self.welcome_label.config(text=self.sites[self.i])
                     next_site = Button(self.fenster, text='nächste seite', command=self.next_site)
-                    previous_site = Button(self.fenster, text='vorherige seite', command=self.previous_site)
+                    previous_site = Button(self.fenster, text='vorherige seite',
+                                           command=self.previous_site)
                     next_site.grid(row=2, column=2)
                     previous_site.grid(row=2, column=0)
-                    
+
                 # link function to change dropdown
                 self.tkvar.trace('w', change_dropdown)
 
@@ -239,7 +240,6 @@ class gui(object):
 
         self.welcom_button = Button(self.fenster, text='Suchen', command=self.search)
 
-
         my_label.grid(row=0, column=0)
         self.eingabefeld.grid(row=0, column=1)
         self.welcom_button.grid(row=1, column=1)
@@ -251,3 +251,4 @@ class gui(object):
 if __name__ == '__main__':
     gui = gui()
     gui.run()
+
