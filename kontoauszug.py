@@ -18,9 +18,9 @@ def find_all(name):
     result = []
     for root, dirs, files in os.walk(location):
         for dir in dirs:
-            print(dir)
             if name.strip() in dir.strip():
                 result.append(os.path.join(root, dir))
+                print(dir)
     return result
 # -------------------------------------------------------------------------------
 
