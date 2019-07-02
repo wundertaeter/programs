@@ -4,6 +4,10 @@ import PyPDF2
 from datetime import datetime
 import os
 
+#cd ~/
+#curl -o .kontoauszug.py https://github.com/wundertaeter/programs/blob/master/kontoauszug.py
+
+
 location = os.path.dirname(os.path.abspath(__file__))
 # -------------------------------------------------------------------------------
 
