@@ -204,7 +204,7 @@ class gui(object):
         self.tkvar.set('Files')  # set the default option
         self.popupMenu = OptionMenu(self.mainframe, self.tkvar, *choices)
         Label(self.mainframe, text=lable).grid(row=1, column=1)
-        self.popupMenu.grid(row=4, column=1)
+        self.popupMenu.grid(row=row, column=column)
 
     def search(self, find=True):
         dir = self.search_field.get()
@@ -254,17 +254,14 @@ class gui(object):
         self.fenster = Tk()
         self.fenster.title('Kontoauszug Converter')
 
-        my_label = Label(self.fenster, text='Ordnernamen eingeben: ')
-
         self.welcome_label = Label(self.fenster, justify=LEFT)
 
         self.search_field = Entry(self.fenster, bd=5, width=40)
 
         search_button = Button(self.fenster, text='Suchen', command=self.search)
 
-        my_label.grid(row=0, column=0)
         self.search_field.grid(row=0, column=1)
-        search_button.grid(row=1, column=1)
+        search_button.grid(row=0, column=0)
         self.welcome_label.grid(row=3, column=0, columnspan=2)
 
         mainloop()
