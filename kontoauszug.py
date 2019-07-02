@@ -166,7 +166,7 @@ def convert(pdf_names, path, mode='w'):
 
 class gui(object):
     def __init__(self):
-        self.sites = ''
+        self.sites = []
         self.paths = []
         self.i = 0
 
