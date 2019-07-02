@@ -20,7 +20,7 @@ def find_all(name):
         for dir in dirs:
             if name.strip() in dir.strip():
                 result.append(os.path.join(root, dir))
-                print(dir)
+                print(os.path.join(root, dir))
     return result
 # -------------------------------------------------------------------------------
 
