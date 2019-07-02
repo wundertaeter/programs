@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from tkinter import *
 import PyPDF2
 from datetime import datetime
