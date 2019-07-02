@@ -14,13 +14,22 @@ location = os.path.dirname(os.path.abspath(__file__))
 # -------------------------------------------------------------------------------
 
 
-def find_all(name):
+def find_all(name, dirs=[]):
+    if len(dirs) == 0:
+        dirs = [name]
+        
     result = []
-    for root, dirs, files in os.walk(location):
-        for dir in dirs:
-            if name.strip() in dir.strip():
-                result.append(os.path.join(root, dir))
-    return result
+    for name in dirs:
+        for root, dirs, files in os.walk(location):
+            for dir in dirs:
+                if name.strip() in dir.strip():
+                    result.append(os.path.join(root, dir))
+                dir.append(dir)
+                
+    if len(result) > 0:
+        return result
+    else:
+        find_all(name, dirs)
 # -------------------------------------------------------------------------------
 
 
