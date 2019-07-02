@@ -4,9 +4,6 @@ import PyPDF2
 from datetime import datetime
 import os
 
-#cd ~/
-#curl -o .kontoauszug.py https://github.com/wundertaeter/programs/blob/master/kontoauszug.py
-
 location = os.path.dirname(os.path.abspath(__file__))
 # -------------------------------------------------------------------------------
 
@@ -40,7 +37,7 @@ class kto_ausz_Parser(object):
                 date2 = datetime.strptime(self.__content[i+10:i+20], format_in).date()
                 found = True
             except:
-                pass 
+                pass
 
             if found:
                 self.__content = self.__content[i+20:].strip()
@@ -102,8 +99,8 @@ class kto_ausz_Parser(object):
         s = '{} --> {} Buchungszeilen\n'.format(name, self.num_rows)
         for row in self.rows:
             s += ' -----------------------------------------------------------------------------------------------\n'
-            s += '|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\n'.format(row[0], row[1],
-                                                          (row[2][:10]+'...' + row[2][-10:]), row[3])
+            s += '\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\n'.format(row[0], row[1],
+                                                            (row[2][:10]+'...' + row[2][-10:]), row[3])
             i += 1
             if i % 20 == 0:
                 s += ' -----------------------------------------------------------------------------------------------\n'
@@ -218,7 +215,11 @@ class gui(object):
                         list_of_files = [file_name]
                     self.sites = convert(list_of_files, path)
                     self.welcome_label.config(text=self.sites[self.i])
-
+                    next_site = Button(self.fenster, text='nächste seite', command=self.next_site)
+                    previous_site = Button(self.fenster, text='vorherige seite', command=self.previous_site)
+                    next_site.grid(row=2, column=2)
+                    previous_site.grid(row=2, column=0)
+                    
                 # link function to change dropdown
                 self.tkvar.trace('w', change_dropdown)
 
@@ -233,14 +234,11 @@ class gui(object):
         self.eingabefeld = Entry(self.fenster, bd=5, width=40)
 
         self.welcom_button = Button(self.fenster, text='Suchen', command=self.search)
-        next_site = Button(self.fenster, text='nächste seite', command=self.next_site)
-        previous_site = Button(self.fenster, text='vorherige seite', command=self.previous_site)
+
 
         my_label.grid(row=0, column=0)
         self.eingabefeld.grid(row=0, column=1)
         self.welcom_button.grid(row=1, column=1)
-        next_site.grid(row=2, column=2)
-        previous_site.grid(row=2, column=0)
         self.welcome_label.grid(row=3, column=0, columnspan=2)
 
         mainloop()
