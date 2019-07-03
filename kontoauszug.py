@@ -128,7 +128,6 @@ def convert(pdf_names, path, mode='w'):
         read_pdf = PyPDF2.PdfFileReader(pdf_file)
         number_of_pages = read_pdf.getNumPages()
 
-        i = 1
         pages = []
         num_rows = []
         for number in range(number_of_pages):
@@ -142,7 +141,6 @@ def convert(pdf_names, path, mode='w'):
             parsed_kto_ausz.to_tsv(path, mode=mode, name=name_out)
             if len(s.split('\n')) > largest:
                 largest = len(s.split('\n'))
-            i += 1
 
         ktos.append(pages)
         num_of_rows.append(num_rows)
