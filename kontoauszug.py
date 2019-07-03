@@ -99,16 +99,16 @@ class kto_ausz_Parser(object):
                                                          (row[2][:10]+'...' + row[2][-10:]), row[3]))
         print(' -----------------------------------------------------------------------------------------------\n')
 
-    def to_sites(self, name):
+    def to_sites(self, name, size=20):
         i = 0
         sites = []
         s = '{} --> {} Buchungszeilen\n'.format(name, self.num_rows)
         for row in self.rows:
             s += ' -------------------------------------------------------------------------------------------------------------------------------------\n'
-            s += '|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\n'.format(row[0], row[1],
-                                                          (row[2][:10]+'...' + row[2][-10:]), row[3])
+            s += '|\t{}\t|\t{}\t|\t{}    \t|\t{}\t|\n'.format(row[0], row[1],
+                                                              (row[2][:10]+'...' + row[2][-10:]), row[3])
             i += 1
-            if i % 20 == 0:
+            if i % size == 0:
                 s += ' -------------------------------------------------------------------------------------------------------------------------------------\n'
                 sites.append(s)
                 s = ''
@@ -232,8 +232,8 @@ class gui(object):
                     next_site = Button(self.fenster, text='nächste seite', command=self.next_site)
                     previous_site = Button(self.fenster, text='vorherige seite',
                                            command=self.previous_site)
-                    next_site.grid(row=2, column=1)
-                    previous_site.grid(row=2, column=0)
+                    next_site.grid(row=3, column=1)
+                    previous_site.grid(row=3, column=0)
 
                 # link function to change dropdown
                 self.tkvar.trace('w', change_dropdown)
@@ -258,9 +258,11 @@ class gui(object):
 
         search_button = Button(self.fenster, text='Suchen', command=self.search)
 
+        self.create_drob_down(['..'], row=0, headline='Ordner auswählen', lable='Ordner ')
+        self.create_drob_down(['..'], row=1, headline='Datei auswählen   ', lable='Dateien')
         self.search_field.grid(row=0, column=1)
         search_button.grid(row=0, column=0)
-        self.welcome_label.grid(row=3, column=0, columnspan=2)
+        self.welcome_label.grid(row=2, column=0, columnspan=2)
 
         mainloop()
 
