@@ -99,6 +99,15 @@ class kto_ausz_Parser(object):
                                                          (row[2][:10]+'...' + row[2][-10:]), row[3]))
         print(' -----------------------------------------------------------------------------------------------\n')
 
+    def to_string(self):
+        s = ''
+        for row in self.rows:
+            s += ' -------------------------------------------------------------------------------------------------------------------------------------\n'
+            s += '|\t{}\t|\t{}\t|\t{}    \t|\t{}\t|\n'.format(row[0], row[1],
+                                                              (row[2][:10]+'...' + row[2][-10:]), row[3])
+        s += ' -------------------------------------------------------------------------------------------------------------------------------------\n'
+        return s
+
     def to_sites(self, name, size=20):
         i = 0
         sites = []
@@ -137,15 +146,18 @@ class kto_ausz_Parser(object):
 
 
 def convert(pdf_names, path, mode='w'):
-    pages = []
     if len(pdf_names) == 1:
         name_out = pdf_names[0].split('.')[0]+'.tsv'
     else:
         name_out = 'kontoauszüge.tsv'
+
+    if 'w' in mode:
         with open(path+'/'+name_out, 'w') as f:
             pass
         mode = 'a'
 
+    largest = 0
+    all_pages = []
     for name in set(pdf_names):
         try:
             pdf_file = open(path + '/' + name, 'rb')
@@ -154,16 +166,31 @@ def convert(pdf_names, path, mode='w'):
         read_pdf = PyPDF2.PdfFileReader(pdf_file)
         number_of_pages = read_pdf.getNumPages()
 
-        content = ''
+        i = 1
+        len_rows = []
+        pages = []
         for number in range(number_of_pages):
             page = read_pdf.getPage(number)
             page_content = page.extractText()
-            content += page_content
+            parsed_kto_ausz = kto_ausz_Parser(page_content, '%d.%m.%Y', '%d.%m.%Y')
+            if len(parsed_kto_ausz.rows) > 0:
+                s = parsed_kto_ausz.to_string()
+                pages.append(s)
+                len_rows.append(len(parsed_kto_ausz.rows))
+            parsed_kto_ausz.to_tsv(path, mode=mode, name=name_out)
+            if len(s.split('\n')) > largest:
+                largest = len(s.split('\n'))
+            i += 1
 
-        parsed_kto_ausz = kto_ausz_Parser(content, '%d.%m.%Y', '%d.%m.%Y')
-        parsed_kto_ausz.to_tsv(path, mode=mode, name=name_out)
-        pages.extend(parsed_kto_ausz.to_sites(name))
-    return pages
+        for i in range(len(pages)):
+            pages[i] = '\n{}\n'.format(name) + pages[i]
+            pages[i] += '{} Buchungszeilen\t\t\t\t\t\t\t\t\t\tPage {}/{}'.format(
+                len_rows[i], i+1, len(pages))
+            for _ in range(largest-len_rows[i]*2+1):
+                pages[i] += '\n'
+        all_pages.extend(pages)
+
+    return all_pages
 
 # --------------------------------------------------------------------
 
@@ -188,24 +215,19 @@ class gui(object):
             self.i -= 1
         self.welcome_label.config(text=self.sites[self.i])
 
-    def create_drob_down(self, list_of_names, row, start='', headline='', lable=''):
+    def create_drob_down(self, list_of_names, row, column=1, start='', headline='', lable=''):
         choices = []
         if len(start) > 0:
             choices.append(start)
         choices.extend(list_of_names)
-        # Add a grid
-        self.mainframe = Frame(self.fenster)
-        self.mainframe.grid(column=2, row=row, sticky=(N, W, E, S))
-
         # Create a Tkinter variable
         self.tkvar = StringVar(self.fenster)
 
-        # Dictionary with options
-
         self.tkvar.set(lable)  # set the default option
-        self.popupMenu = OptionMenu(self.mainframe, self.tkvar, *choices)
-        Label(self.mainframe, text=headline).grid(row=1, column=1)
-        self.popupMenu.grid(column=3, row=1)
+        self.popupMenu = OptionMenu(self.fenster, self.tkvar, *choices)
+        Label(self.fenster, text=headline, justify=LEFT, borderwidth=1, relief="groove").grid(
+            row=row, column=0, sticky=(N, W, E, S))
+        self.popupMenu.grid(column=column, row=row, sticky=(N, W, E, S))
 
     def search(self, find=True):
         dir = self.search_field.get()
@@ -219,9 +241,9 @@ class gui(object):
             elif len(self.paths) == 1:
                 self.welcome_label.config(text='')
                 path = self.paths[0]
-                self.create_drob_down([path], row=0, headline='Ordner auswählen', lable=path)
+                self.create_drob_down([path], row=1, headline='Ordner auswählen', lable=path)
                 self.list_of_files = [name for name in os.listdir(path) if name.endswith('.PDF')]
-                self.create_drob_down(self.list_of_files, row=1, start='Alle',
+                self.create_drob_down(self.list_of_files, row=2, start='Alle',
                                       headline='Datei auswählen   ', lable='Dateien')
 
                 # on change dropdown value
@@ -236,8 +258,8 @@ class gui(object):
                     next_site = Button(self.fenster, text='nächste seite', command=self.next_site)
                     previous_site = Button(self.fenster, text='vorherige seite',
                                            command=self.previous_site)
-                    next_site.grid(row=3, column=1)
-                    previous_site.grid(row=3, column=0)
+                    next_site.grid(row=4, column=1)
+                    previous_site.grid(row=4, column=0)
 
                 # link function to change dropdown
                 self.tkvar.trace('w', change_dropdown)
@@ -245,7 +267,7 @@ class gui(object):
                 text = '\t\t\tMehrere Ordner gefunden!!'
                 self.welcome_label.config(text=text)
                 self.create_drob_down(
-                    self.paths, row=0, headline='Ordner auswählen', lable='Ordner')
+                    self.paths, row=1, headline='Ordner auswählen', lable='Ordner')
 
                 def change_dropdown_dirs(*args):
                     self.paths = [self.tkvar.get()]
@@ -262,11 +284,11 @@ class gui(object):
 
         search_button = Button(self.fenster, text='Suchen', command=self.search)
 
-        self.create_drob_down(['..'], row=0, headline='Ordner auswählen', lable='Ordner ')
-        self.create_drob_down(['..'], row=1, headline='Datei auswählen   ', lable='Dateien')
-        self.search_field.grid(row=0, column=1)
-        search_button.grid(row=0, column=0)
-        self.welcome_label.grid(row=2, column=0, columnspan=2)
+        self.create_drob_down(['..'], row=1, headline='Ordner auswählen', lable='Ordner ')
+        self.create_drob_down(['..'], row=2, headline='Datei auswählen   ', lable='Dateien')
+        self.search_field.grid(row=0, column=1, sticky=(N, W, E, S))
+        search_button.grid(row=0, column=0, sticky=(N, W, E, S))
+        self.welcome_label.grid(row=3, column=0, columnspan=2, sticky=(N, W, E, S))
 
         mainloop()
 
