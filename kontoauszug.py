@@ -158,7 +158,9 @@ def convert(pdf_names, path, mode='w'):
 
     largest = 0
     all_pages = []
-    for name in set(pdf_names):
+    ktos = []
+    num_of_rows = []
+    for name in pdf_names:
         try:
             pdf_file = open(path + '/' + name, 'rb')
         except:
@@ -167,8 +169,8 @@ def convert(pdf_names, path, mode='w'):
         number_of_pages = read_pdf.getNumPages()
 
         i = 1
-        len_rows = []
         pages = []
+        num_rows = []
         for number in range(number_of_pages):
             page = read_pdf.getPage(number)
             page_content = page.extractText()
@@ -176,18 +178,24 @@ def convert(pdf_names, path, mode='w'):
             if len(parsed_kto_ausz.rows) > 0:
                 s = parsed_kto_ausz.to_string()
                 pages.append(s)
-                len_rows.append(len(parsed_kto_ausz.rows))
+                num_rows.append(len(parsed_kto_ausz.rows))
             parsed_kto_ausz.to_tsv(path, mode=mode, name=name_out)
             if len(s.split('\n')) > largest:
                 largest = len(s.split('\n'))
             i += 1
 
+        ktos.append(pages)
+        num_of_rows.append(num_rows)
+
+    for index in range(len(ktos)):
+        pages = ktos[index]
+        num_rows = num_of_rows[index]
         for i in range(len(pages)):
             pages[i] = '\n{}\n'.format(name) + pages[i]
-            pages[i] += '{} Buchungszeilen\t\t\t\t\t\t\t\t\t\tPage {}/{}'.format(
-                len_rows[i], i+1, len(pages))
-            for _ in range(largest-len_rows[i]*2+1):
+            for _ in range((largest-num_rows[i]*2+2)):
                 pages[i] += '\n'
+            pages[i] += '{} Buchungszeilen\t\t\t\t\t\t\t\t\t\tPage {}/{}'.format(
+                num_rows[i], i+1, len(pages))
         all_pages.extend(pages)
 
     return all_pages
@@ -200,6 +208,23 @@ class gui(object):
         self.sites = []
         self.paths = []
         self.i = 0
+
+    def init(self, search=False):
+        for l in self.root.grid_slaves():
+            if not 'entry' in str(l):
+                l.destroy()
+        self.welcome_label = Label(self.root, justify=LEFT)
+        self.welcome_label.grid(row=5, column=0, columnspan=2, sticky=(N, W, E, S))
+
+        search_button = Button(self.root, text='Suchen', command=self.search)
+        search_button.grid(row=0, column=0, sticky=(N, W, E, S))
+
+        self.create_drob_down(['..'], row=1, headline='Ordner auswählen', lable='Ordner ')
+        self.create_drob_down(['..'], row=2, headline='Datei auswählen   ', lable='Dateien')
+
+        if not search:
+            self.search_field = Entry(self.root, bd=5, width=40)
+            self.search_field.grid(row=0, column=1, sticky=(N, W, E, S))
 
     def next_site(self):
         if self.i == len(self.sites)-1:
@@ -220,16 +245,16 @@ class gui(object):
         if len(start) > 0:
             choices.append(start)
         choices.extend(list_of_names)
-        # Create a Tkinter variable
-        self.tkvar = StringVar(self.fenster)
+        self.tkvar = StringVar(self.root)
 
-        self.tkvar.set(lable)  # set the default option
-        self.popupMenu = OptionMenu(self.fenster, self.tkvar, *choices)
-        Label(self.fenster, text=headline, justify=LEFT, borderwidth=1, relief="groove").grid(
+        self.tkvar.set(lable)
+        self.popupMenu = OptionMenu(self.root, self.tkvar, *choices)
+        Label(self.root, text=headline, justify=LEFT, borderwidth=1, relief="groove").grid(
             row=row, column=0, sticky=(N, W, E, S))
         self.popupMenu.grid(column=column, row=row, sticky=(N, W, E, S))
 
-    def search(self, find=True):
+    def search(self, find=True, init=False):
+        self.init(search=True)
         dir = self.search_field.get()
         if (dir == ''):
             self.welcome_label.config(text='Bitte zuerst Ordnernamen eingeben')
@@ -246,7 +271,6 @@ class gui(object):
                 self.create_drob_down(self.list_of_files, row=2, start='Alle',
                                       headline='Datei auswählen   ', lable='Dateien')
 
-                # on change dropdown value
                 def change_dropdown(*args):
                     file_name = self.tkvar.get()
                     if file_name == 'Alle':
@@ -255,13 +279,16 @@ class gui(object):
                         list_of_files = [file_name]
                     self.sites = convert(list_of_files, path)
                     self.welcome_label.config(text=self.sites[self.i])
-                    next_site = Button(self.fenster, text='nächste seite', command=self.next_site)
-                    previous_site = Button(self.fenster, text='vorherige seite',
-                                           command=self.previous_site)
-                    next_site.grid(row=4, column=1)
-                    previous_site.grid(row=4, column=0)
 
-                # link function to change dropdown
+                    Label(self.root, text='').grid(row=3, column=0, sticky=(N, W, E, S))
+
+                    previous_site = Button(self.root, text='vorherige seite',
+                                           command=self.previous_site)
+                    previous_site.grid(row=4, column=0, sticky=W)
+
+                    next_site = Button(self.root, text='nächste seite', command=self.next_site)
+                    next_site.grid(row=4, column=1, sticky=E)
+
                 self.tkvar.trace('w', change_dropdown)
             else:
                 text = '\t\t\tMehrere Ordner gefunden!!'
@@ -275,21 +302,9 @@ class gui(object):
                 self.tkvar.trace('w', change_dropdown_dirs)
 
     def run(self):
-        self.fenster = Tk()
-        self.fenster.title('Kontoauszug Converter')
-
-        self.welcome_label = Label(self.fenster, justify=LEFT)
-
-        self.search_field = Entry(self.fenster, bd=5, width=40)
-
-        search_button = Button(self.fenster, text='Suchen', command=self.search)
-
-        self.create_drob_down(['..'], row=1, headline='Ordner auswählen', lable='Ordner ')
-        self.create_drob_down(['..'], row=2, headline='Datei auswählen   ', lable='Dateien')
-        self.search_field.grid(row=0, column=1, sticky=(N, W, E, S))
-        search_button.grid(row=0, column=0, sticky=(N, W, E, S))
-        self.welcome_label.grid(row=3, column=0, columnspan=2, sticky=(N, W, E, S))
-
+        self.root = Tk()
+        self.root.title('Kontoauszug Converter')
+        self.init()
         mainloop()
 
 
