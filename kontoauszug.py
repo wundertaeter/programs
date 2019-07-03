@@ -135,7 +135,8 @@ def convert(pdf_names, path, mode='w'):
             page_content = page.extractText()
             parsed_kto_ausz = kto_ausz_Parser(page_content, '%d.%m.%Y', '%d.%m.%Y')
             if len(parsed_kto_ausz.rows) > 0:
-                s = parsed_kto_ausz.to_string()
+                s = '\n{}\n'.format(name)
+                s += parsed_kto_ausz.to_string()
                 pages.append(s)
                 num_rows.append(len(parsed_kto_ausz.rows))
             parsed_kto_ausz.to_tsv(path, mode=mode, name=name_out)
@@ -149,10 +150,9 @@ def convert(pdf_names, path, mode='w'):
         pages = ktos[index]
         num_rows = num_of_rows[index]
         for i in range(len(pages)):
-            pages[i] = '\n{}\n'.format(name) + pages[i]
             for _ in range((largest-num_rows[i]*2+2)):
                 pages[i] += '\n'
-            pages[i] += '{} Buchungszeilen\t\t\t\t\t\t\t\t\t\tPage {}/{}'.format(
+            pages[i] += 'Buchungszeilen: {}\t\t\t\t\t\t\t\t\t\tPage {}/{}'.format(
                 num_rows[i], i+1, len(pages))
         all_pages.extend(pages)
 
