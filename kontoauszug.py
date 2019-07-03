@@ -5,7 +5,7 @@ import os
 
 #----Install------#
 # curl -o ~/.kontoauszug.py https://raw.githubusercontent.com/wundertaeter/programs/master/kontoauszug.py
-# echo ~/.kontoauszug.py > /Applications/kontoauszug.command
+# echo python3 ~/.kontoauszug.py > /Applications/kontoauszug.command
 # chmod 744 /Applications/kontoauszug.command
 #-----------------#
 
