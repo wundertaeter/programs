@@ -80,25 +80,6 @@ class kto_ausz_Parser(object):
                 pass
         return count
 
-    def get_dates1(self, page):
-        return [row[0] for row in self.rows]
-
-    def get_dates2(self):
-        return [row[1] for row in self.rows]
-
-    def get_descriptions(self):
-        return [row[2] for row in self.rows]
-
-    def get_amounts(self):
-        return [row[3] for row in self.rows]
-
-    def print(self):
-        for row in self.rows:
-            print(' -----------------------------------------------------------------------------------------------')
-            print('|\t{}\t|\t{}\t|\t{}\t|\t{}\t|'.format(row[0], row[1],
-                                                         (row[2][:10]+'...' + row[2][-10:]), row[3]))
-        print(' -----------------------------------------------------------------------------------------------\n')
-
     def to_string(self):
         s = ''
         for row in self.rows:
@@ -107,27 +88,6 @@ class kto_ausz_Parser(object):
                                                               (row[2][:10]+'...' + row[2][-10:]), row[3])
         s += ' -------------------------------------------------------------------------------------------------------------------------------------\n'
         return s
-
-    def to_sites(self, name, size=20):
-        i = 0
-        sites = []
-        s = '{} --> {} Buchungszeilen\n'.format(name, self.num_rows)
-        for row in self.rows:
-            s += ' -------------------------------------------------------------------------------------------------------------------------------------\n'
-            s += '|\t{}\t|\t{}\t|\t{}    \t|\t{}\t|\n'.format(row[0], row[1],
-                                                              (row[2][:10]+'...' + row[2][-10:]), row[3])
-            i += 1
-            if i % size == 0:
-                s += ' -------------------------------------------------------------------------------------------------------------------------------------\n'
-                sites.append(s)
-                s = '\n'
-                i = 0
-        if s != '':
-            s += ' -------------------------------------------------------------------------------------------------------------------------------------\n'
-            for _ in range(((20-i)*2)):
-                s += '\n'
-            sites.append(s)
-        return sites
 
     def to_tsv(self, path, name='kontoauszug.tsv', mode='w'):
         if not 'w' in mode and not 'a' in mode:
