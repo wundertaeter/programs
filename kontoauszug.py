@@ -5,7 +5,7 @@ import os
 
 #----Install------#
 # curl -o ~/.kontoauszug.py https://raw.githubusercontent.com/wundertaeter/programs/master/kontoauszug.py
-# echo python3 ~/.kontoauszug.py > /Applications/kontoauszug.command
+# echo ~/.kontoauszug.py > /Applications/kontoauszug.command
 # chmod 744 /Applications/kontoauszug.command
 #-----------------#
 
@@ -218,7 +218,7 @@ class gui(object):
                 self.create_drob_down([path], row=0, headline='Ordner auswählen', lable=path)
                 self.list_of_files = [name for name in os.listdir(path) if name.endswith('.PDF')]
                 self.create_drob_down(self.list_of_files, row=1, start='Alle',
-                                      headline='Datei auswählen', lable='Dateien')
+                                      headline='Datei auswählen   ', lable='Dateien')
 
                 # on change dropdown value
                 def change_dropdown(*args):
