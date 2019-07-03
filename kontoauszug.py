@@ -262,6 +262,7 @@ class gui(object):
     def run(self):
         self.root = Tk()
         self.root.title('Kontoauszug Converter')
+        self.root.bind('<Return>', self.search)
         self.init()
         mainloop()
 
