@@ -120,10 +120,7 @@ def convert(pdf_names, path, mode='w'):
     all_pages = []
     ktos = []
     for name in pdf_names:
-        try:
-            pdf_file = open(path + '/' + name, 'rb')
-        except:
-            print('{} not found'.format(name))
+        pdf_file = open(path + '/' + name, 'rb')
         read_pdf = PyPDF2.PdfFileReader(pdf_file)
         number_of_pages = read_pdf.getNumPages()
 
