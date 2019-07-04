@@ -8,9 +8,8 @@ import os
 # echo python3 ~/.kontoauszug.py > /Applications/kontoauszug.command
 # chmod 744 /Applications/kontoauszug.command
 #-----------------#
+location = os.path.expanduser('~')
 
-os.path.join(os.path.dirname(__file__))
-location = os.path.dirname(os.path.abspath(__file__))
 # -------------------------------------------------------------------------------
 
 
@@ -84,16 +83,13 @@ class kto_ausz_Parser(object):
         s = ''
         for row in self.rows:
             s += ' -------------------------------------------------------------------------------------------------------------------------------------\n'
-            s += '|\t{}\t|\t{}\t|\t{}    \t|\t{}\t|\n'.format(row[0], row[1],
-                                                              (row[2][:10]+'...' + row[2][-10:]), row[3])
+            s += '|\t{}    \t|\t{}    \t|\t{}    \t|\t{}    \t|\n'.format(row[0], row[1],
+                                                                          (row[2][:10]+'...' + row[2][-10:]), row[3])
         s += ' -------------------------------------------------------------------------------------------------------------------------------------\n'
         return s
 
     def to_tsv(self, path, name='kontoauszug.tsv', mode='w'):
-        if not 'w' in mode and not 'a' in mode:
-            print('[ERROR] invalid mode "{}"'.format(mode))
-            return
-        with open(path + '/' + name, mode) as f:
+        with open(path + '/' + name, mode, encoding='utf-8') as f:
             for row in self.rows:
                 for value in row:
                     if value == row[-1]:
