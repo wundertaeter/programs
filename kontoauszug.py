@@ -78,8 +78,8 @@ class kto_ausz_Parser(object):
         s = ''
         for row in self.rows:
             s += ' -------------------------------------------------------------------------------------------------------------------------------------\n'
-            s += '|\t{}    \t|\t{}    \t|\t{}    \t|\t{}    \t|\n'.format(row[0], row[1],
-                                                                          (row[2][:10]+'...' + row[2][-10:]), row[3])
+            s += '|\t{}    \t|\t{}    \t|\t{}    \t|\t{}\t|\n'.format(row[0], row[1],
+                                                                      (row[2][:10]+'...' + row[2][-10:]), row[3])
         s += ' -------------------------------------------------------------------------------------------------------------------------------------\n'
         return s
 
@@ -96,6 +96,16 @@ class kto_ausz_Parser(object):
                         f.write(value+'\t')
 
 
+def beautify(name, pages, num_rows, size=30):
+    for i in range(len(pages)):
+        pages[i] = '\n{}\n'.format(name) + pages[i]
+        for _ in range((size-num_rows[i]*2+2)):
+            pages[i] += '\n'
+        pages[i] += 'Buchungszeilen: {}\t\t\t\t\t\t\t\t\t\tPage {}/{}'.format(
+            num_rows[i], i+1, len(pages))
+    return pages
+
+
 def convert(pdf_names, path, mode='w'):
     if len(pdf_names) == 1:
         name_out = pdf_names[0].split('.')[0]+'.tsv'
@@ -107,45 +117,30 @@ def convert(pdf_names, path, mode='w'):
             pass
         mode = 'a'
 
-    largest = 0
     all_pages = []
     ktos = []
-    num_of_rows = []
     for name in pdf_names:
         try:
             pdf_file = open(path + '/' + name, 'rb')
         except:
-            pass
+            print('{} not found'.format(name))
         read_pdf = PyPDF2.PdfFileReader(pdf_file)
         number_of_pages = read_pdf.getNumPages()
 
-        pages = []
         num_rows = []
+        pages = []
         for number in range(number_of_pages):
             page = read_pdf.getPage(number)
             page_content = page.extractText()
             parsed_kto_ausz = kto_ausz_Parser(page_content, '%d.%m.%Y', '%d.%m.%Y')
+
             if len(parsed_kto_ausz.rows) > 0:
-                s = '\n{}\n'.format(name)
-                s += parsed_kto_ausz.to_string()
+                s = parsed_kto_ausz.to_string()
                 pages.append(s)
                 num_rows.append(len(parsed_kto_ausz.rows))
-            parsed_kto_ausz.to_tsv(path, mode=mode, name=name_out)
-            if len(s.split('\n')) > largest:
-                largest = len(s.split('\n'))
+                parsed_kto_ausz.to_tsv(path, mode=mode, name=name_out)
 
-        ktos.append(pages)
-        num_of_rows.append(num_rows)
-
-    for index in range(len(ktos)):
-        pages = ktos[index]
-        num_rows = num_of_rows[index]
-        for i in range(len(pages)):
-            for _ in range((largest-num_rows[i]*2+2)):
-                pages[i] += '\n'
-            pages[i] += 'Buchungszeilen: {}\t\t\t\t\t\t\t\t\t\tPage {}/{}'.format(
-                num_rows[i], i+1, len(pages))
-        all_pages.extend(pages)
+        all_pages.extend(beautify(name, pages, num_rows))
 
     return all_pages
 
@@ -221,6 +216,7 @@ class gui(object):
                                       headline='Datei auswählen   ', lable='Dateien')
 
                 def change_dropdown(*args):
+                    self.i = 0
                     file_name = self.tkvar.get()
                     if file_name == 'Alle':
                         list_of_files = self.list_of_files
