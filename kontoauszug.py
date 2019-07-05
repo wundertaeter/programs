@@ -154,8 +154,8 @@ class gui(object):
         for l in self.root.grid_slaves():
             if not 'entry' in str(l):
                 l.destroy()
-        self.welcome_label = Label(self.root, justify=LEFT)
-        self.welcome_label.grid(row=5, column=0, columnspan=2, sticky=(N, W, E, S))
+        self.display = Label(self.root, justify=LEFT)
+        self.display.grid(row=5, column=0, columnspan=2, sticky=(N, W, E, S))
 
         search_button = Button(self.root, text='Suchen', command=self.search)
         search_button.grid(row=0, column=0, sticky=(N, W, E, S))
@@ -172,14 +172,14 @@ class gui(object):
             self.i = 0
         else:
             self.i += 1
-        self.welcome_label.config(text=self.sites[self.i])
+        self.display.config(text=self.sites[self.i])
 
     def previous_site(self):
         if self.i == (len(self.sites)-1)*(-1):
             self.i = 0
         else:
             self.i -= 1
-        self.welcome_label.config(text=self.sites[self.i])
+        self.display.config(text=self.sites[self.i])
 
     def create_drob_down(self, list_of_names, row, column=1, start='', headline='', lable=''):
         choices = []
@@ -194,54 +194,57 @@ class gui(object):
             row=row, column=0, sticky=(N, W, E, S))
         self.popupMenu.grid(column=column, row=row, sticky=(N, W, E, S))
 
+    def change_dropdown_dirs(self, *args):
+        self.paths = [self.tkvar.get()]
+        self.search(find=False)
+
+    def change_dropdown_files(self, *args):
+        self.i = 0
+        file_name = self.tkvar.get()
+        if file_name == 'Alle':
+            list_of_files = self.list_of_files
+        else:
+            list_of_files = [file_name]
+        self.sites = convert(list_of_files, self.paths[0])
+        self.display.config(text=self.sites[self.i])
+
+        Label(self.root, text='').grid(row=3, column=0, sticky=(N, W, E, S))
+
+        previous_site = Button(self.root, text='vorherige seite',
+                               command=self.previous_site)
+        previous_site.grid(row=4, column=0, sticky=W)
+
+        next_site = Button(self.root, text='nächste seite', command=self.next_site)
+        next_site.grid(row=4, column=1, sticky=E)
+
     def search(self, find=True, init=False):
         self.init(search=True)
         dir = self.search_field.get()
         if (dir == ''):
-            self.welcome_label.config(text='Bitte zuerst Ordnernamen eingeben')
+            self.display.config(text='Bitte zuerst Ordnernamen eingeben')
         else:
             if find:
                 self.paths = find_all(dir)
+
             if len(self.paths) == 0:
-                self.welcome_label.config(text='Keine Ordner gefunden')
+                self.display.config(text='Keine Ordner gefunden')
             elif len(self.paths) == 1:
-                self.welcome_label.config(text='')
-                path = self.paths[0]
-                self.create_drob_down([path], row=1, headline='Ordner auswählen', lable=path)
-                self.list_of_files = [name for name in os.listdir(path) if name.endswith('.PDF')]
+                self.display.config(text='')
+                self.list_of_files = [name for name in os.listdir(
+                    self.paths[0]) if name.endswith('.PDF')]
+
+                self.create_drob_down(
+                    self.paths, row=1, headline='Ordner auswählen', lable=self.paths[0])
                 self.create_drob_down(self.list_of_files, row=2, start='Alle',
                                       headline='Datei auswählen   ', lable='Dateien')
 
-                def change_dropdown(*args):
-                    self.i = 0
-                    file_name = self.tkvar.get()
-                    if file_name == 'Alle':
-                        list_of_files = self.list_of_files
-                    else:
-                        list_of_files = [file_name]
-                    self.sites = convert(list_of_files, path)
-                    self.welcome_label.config(text=self.sites[self.i])
-
-                    Label(self.root, text='').grid(row=3, column=0, sticky=(N, W, E, S))
-
-                    previous_site = Button(self.root, text='vorherige seite',
-                                           command=self.previous_site)
-                    previous_site.grid(row=4, column=0, sticky=W)
-
-                    next_site = Button(self.root, text='nächste seite', command=self.next_site)
-                    next_site.grid(row=4, column=1, sticky=E)
-
-                self.tkvar.trace('w', change_dropdown)
+                self.tkvar.trace('w', self.change_dropdown_files)
             else:
-                text = '\t\t\tMehrere Ordner gefunden!!'
-                self.welcome_label.config(text=text)
+                self.display.config(text='\t\t\tMehrere Ordner gefunden!!')
                 self.create_drob_down(
                     self.paths, row=1, headline='Ordner auswählen', lable='Ordner')
 
-                def change_dropdown_dirs(*args):
-                    self.paths = [self.tkvar.get()]
-                    self.search(find=False)
-                self.tkvar.trace('w', change_dropdown_dirs)
+                self.tkvar.trace('w', self.change_dropdown_dirs)
 
     def run(self):
         self.root = Tk()
