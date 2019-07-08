@@ -168,18 +168,20 @@ class gui(object):
             self.search_field.grid(row=0, column=1, sticky=(N, W, E, S))
 
     def next_site(self):
-        if self.i == len(self.sites)-1:
-            self.i = 0
-        else:
-            self.i += 1
-        self.display.config(text=self.sites[self.i])
+        if len(self.sites) > 0:
+            if self.i == len(self.sites)-1:
+                self.i = 0
+            else:
+                self.i += 1
+            self.display.config(text=self.sites[self.i])
 
     def previous_site(self):
-        if self.i == (len(self.sites)-1)*(-1):
-            self.i = 0
-        else:
-            self.i -= 1
-        self.display.config(text=self.sites[self.i])
+        if len(self.sites) > 0:
+            if self.i == (len(self.sites)-1)*(-1):
+                self.i = 0
+            else:
+                self.i -= 1
+            self.display.config(text=self.sites[self.i])
 
     def create_drob_down(self, list_of_names, row, column=1, start='', headline='', lable=''):
         choices = []
@@ -216,7 +218,7 @@ class gui(object):
 
         next_site = Button(self.root, text='nächste seite', command=self.next_site)
         next_site.grid(row=4, column=1, sticky=E)
-
+        
     def search(self, find=True, init=False):
         self.init(search=True)
         dir = self.search_field.get()
