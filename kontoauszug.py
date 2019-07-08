@@ -250,6 +250,8 @@ class gui(object):
         self.root = Tk()
         self.root.title('Kontoauszug Converter')
         self.root.bind('<Return>', self.search)
+        self.root.bind('<Left>', self.previous_site)
+        self.root.bind('<Right>', self.next_site)
         self.init()
         mainloop()
 
