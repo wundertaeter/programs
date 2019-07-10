@@ -1,15 +1,21 @@
 from selenium import webdriver
-from my_sqlite3 import executer
+import sqlite3
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 import time
+from tkinter import *
 
-blacklist = executer('./immo.db', 'blacklist')
+connection = sqlite3.connect('./immo.db')
+cursor = connection.cursor()
 try:
-    blacklist.cursor.execute('SELECT * FROM blacklist')
+    cursor.execute('SELECT * FROM blacklist')
 except:
-    blacklist.cursor.execute('CREATE TABLE blacklist(title TEXT)')
+    cursor.execute('CREATE TABLE blacklist(link TEXT PRIMARY KEY)')
+
+def check(key):
+    cursor.execute("SELECT link FROM blacklist WHERE link == '{}'".format(key))
+    return (cursor.fetchone() != None)
 
 
 chrome_path = r"H:\sonstiges\python\chromedriver.exe"
@@ -77,14 +83,15 @@ if __name__ == '__main__':
             flat['link'] = post.get_attribute('href')
             flat['id'] = post.id
             flat['title'] = post.text
-            if not blacklist.check('title', flat['link']):
+            if not check(flat['link']):
                 flats.append(flat)
                 
 
         for flat in flats:
             print(flat['title'])
             submit(flat['link'])
-            blacklist.insert((flat['link'],))
+            with connection:
+                cursor.execute("INSERT INTO blacklist VALUES (?)", (flat['link'],))
         
         time.sleep(30)
         print('[RELOAD..]')
