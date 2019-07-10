@@ -37,7 +37,10 @@ class gui(object):
         self.root = Tk()
         self.makeform()
         search_button = Button(self.root, text='Start', command=self.fetch, width=15)
-        search_button.pack(side=LEFT, fill=BOTH)
+        if self.text_field:
+            search_button.pack(side=LEFT, fill=BOTH)
+        else:
+            search_button.pack(side=BOTTOM, fill=BOTH)
         self.root.mainloop()
 
 if __name__ == '__main__':
