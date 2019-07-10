@@ -55,7 +55,7 @@ def submit(link):
         city = driver.find_element_by_id('contactForm-city')
         city.send_keys("Berlin")
         time.sleep(1)
-        driver.find_element_by_xpath("//button[@data-ng-click='submit()' or contains(.,'Anfrage senden')]").click()
+        #driver.find_element_by_xpath("//button[@data-ng-click='submit()' or contains(.,'Anfrage senden')]").click()
     except Exception as e:
         print('[contactForm ERROR]', e)
 
