@@ -35,16 +35,15 @@ class gui(object):
         
     def run(self):
         self.root = Tk()
-        self.makeform(fields)
+        self.makeform()
         search_button = Button(self.root, text='Start', command=self.fetch, width=15)
         search_button.pack(side=LEFT, fill=BOTH)
-        root.mainloop()
+        self.root.mainloop()
 
 if __name__ == '__main__':
     gui = gui()
     gui.fields = ['url','last_name', 'first_name', 
-              'email', 'street', 'house', 
-              'post_code', 'city']
+                  'email', 'street', 'house', 
+                  'post_code', 'city']
     gui.text_field = True
-    gui.run(fields)
-    
+    gui.run()
