@@ -3,6 +3,7 @@ import sqlite3
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
+import json
 import time
 
 
@@ -18,11 +19,7 @@ def check(key):
     return (cursor.fetchone() != None)
 
 
-#chrome_path = r"H:\sonstiges\python\chromedriver.exe"
-#driver = webdriver.Chrome(chrome_path)
-
-
-def submit(link, driver, map):
+def submit(link, driver, entries):
     driver.get(link)
 
     #Klick auf 'Anbieter kontaktieren'
@@ -41,23 +38,23 @@ def submit(link, driver, map):
 
         text_area = driver.find_element_by_id('contactForm-Message')
         text_area.clear()
-        text_area.send_keys(u'{text_area}'.format_map(map))
+        text_area.send_keys(u'{text_area}'.format_map(entries))
         last_name = driver.find_element_by_id('contactForm-lastName')
-        last_name.send_keys('{last_name}'.format_map(map))
+        last_name.send_keys('{last_name}'.format_map(entries))
         first_name = driver.find_element_by_id('contactForm-firstName')
-        first_name.send_keys('{first_name}'.format_map(map))
+        first_name.send_keys('{first_name}'.format_map(entries))
         email = driver.find_element_by_id('contactForm-emailAddress')
-        email.send_keys ('{email}'.format_map(map))
+        email.send_keys ('{email}'.format_map(entries))
         phone = driver.find_element_by_id('contactForm-phoneNumber')
-        phone.send_keys('{phone}'.format_map(map))
+        phone.send_keys('{phone}'.format_map(entries))
         street = driver.find_element_by_id('contactForm-street')
-        street.send_keys('{street}'.format_map(map))
+        street.send_keys('{street}'.format_map(entries))
         house = driver.find_element_by_id('contactForm-houseNumber')
-        house.send_keys('{house}'.format_map(map))
+        house.send_keys('{house}'.format_map(entries))
         post_code = driver.find_element_by_id('contactForm-postcode')
-        post_code.send_keys('{post_code}'.format_map(map))
+        post_code.send_keys('{post_code}'.format_map(entries))
         city = driver.find_element_by_id('contactForm-city')
-        city.send_keys('{city}'.format_map(map))
+        city.send_keys('{city}'.format_map(entries))
         time.sleep(1)
         #driver.find_element_by_xpath("//button[@data-ng-click='submit()' or contains(.,'Anfrage senden')]").click()
     except Exception as e:
@@ -68,12 +65,21 @@ def submit(link, driver, map):
 
 if __name__ == '__main__':
     #url = 'https://www.immobilienscout24.de/Suche/S-2/Wohnung-Miete/Berlin/Berlin/Friedrichshain-Friedrichshain_Mitte-Mitte_Prenzlauer-Berg-Prenzlauer-Berg/1,50-/-/EURO--700,00/-/3,6,7,8,40,113,118,127/false/-/-/true?enteredFrom=result_list'
-    chrome_path = "/users/mozi/Documents/programing/chromedriver"
-    driver = webdriver.Chrome(executable_path=chrome_path)
+    #chrome_path = "/users/mozi/Documents/programing/chromedriver"
+    #driver = webdriver.Chrome(executable_path=chrome_path)
     #driver = webdriver.Safari()
+
+    chrome_path = r"H:\sonstiges\python\chromedriver.exe"
+    driver = webdriver.Chrome(chrome_path)
+    try:
+        with open('data.json', 'r', encoding='utf-8') as fp:
+            entries = json.load(fp)
+    except:
+        print('[ERROR]: no entries found pls first fill out info form!')
+
     while True:
         try:
-            driver.get(map['url'])
+            driver.get(entries['url'])
         except Exception as e:
             print('[DRIVER GET ERROR]', e)
 
@@ -90,7 +96,7 @@ if __name__ == '__main__':
 
         for flat in flats:
             print(flat['title'])
-            submit(flat['link'], driver, map)
+            submit(flat['link'], driver, entries)
             with connection:
                 cursor.execute("INSERT INTO blacklist VALUES (?)", (flat['link'],))
 
