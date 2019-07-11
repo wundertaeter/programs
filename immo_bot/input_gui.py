@@ -40,7 +40,7 @@ class gui(object):
         if self.text_field:
             text_area = ScrolledText(self.root, height=5, width=30)
             if 'text_area' in default:
-                text_area.insert(END, default[field])
+                text_area.insert(END, default['text_area'])
             text_area.pack(side=RIGHT, fill=X, expand=YES)
             self.__entries['text_area'] = text_area
 
