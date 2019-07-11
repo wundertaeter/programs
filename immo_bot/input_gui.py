@@ -5,6 +5,7 @@ from tkinter.scrolledtext import ScrolledText
 class gui(object):
     def __init__(self):
         self.__entries = {}
+        self.default = {}
         self.fields =[]
         self.text_field = False
         self.file_to_execute = ''
@@ -25,13 +26,13 @@ class gui(object):
             print(e)
 
 
-    def makeform(self, default={}):
+    def makeform(self):
         for field in self.fields:
             row = Frame(self.root)
             lab = Label(row, width=15, text=field, anchor='w')
             ent = Entry(row)
-            if field in default:
-                ent.insert(END, default[field])
+            if field in self.default:
+                ent.insert(END, self.default[field])
             row.pack(side=TOP, fill=X, padx=5, pady=5)
             lab.pack(side=LEFT)
             ent.pack(side=RIGHT, expand=YES, fill=X)
@@ -39,8 +40,8 @@ class gui(object):
 
         if self.text_field:
             text_area = ScrolledText(self.root, height=5, width=30)
-            if 'text_area' in default:
-                text_area.insert(END, default['text_area'])
+            if 'text_area' in self.default:
+                text_area.insert(END, self.default['text_area'])
             text_area.pack(side=RIGHT, fill=X, expand=YES)
             self.__entries['text_area'] = text_area
 
@@ -48,8 +49,8 @@ class gui(object):
         self.root = Tk()
         try:
             with open('data.json', 'r', encoding='utf-8') as fp:
-                values = json.load(fp)
-            self.makeform(default=values)
+                self.default = json.load(fp)
+            self.makeform()
         except:
             self.makeform()
         search_button = Button(self.root, text='Start', command=self.fetch, width=15)
