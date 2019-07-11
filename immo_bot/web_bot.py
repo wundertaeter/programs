@@ -22,7 +22,6 @@ def check(key):
 def submit(link, driver, entries):
     driver.get(link)
 
-    #Klick auf 'Anbieter kontaktieren'
     try:
         driver.find_element_by_xpath("""//*[@id="is24-expose-contact-bar-top"]/div/div/div[1]/div/div[2]/a""").click()
 
@@ -35,26 +34,25 @@ def submit(link, driver, entries):
                 option.click()
                 break
 
-
         text_area = driver.find_element_by_id('contactForm-Message')
         text_area.clear()
-        text_area.send_keys(u'{text_area}'.format_map(entries))
+        text_area.send_keys(entries['text_area'])
         last_name = driver.find_element_by_id('contactForm-lastName')
-        last_name.send_keys('{last_name}'.format_map(entries))
+        last_name.send_keys(entries['last_name'])
         first_name = driver.find_element_by_id('contactForm-firstName')
-        first_name.send_keys('{first_name}'.format_map(entries))
+        first_name.send_keys(entries['first_name'])
         email = driver.find_element_by_id('contactForm-emailAddress')
-        email.send_keys ('{email}'.format_map(entries))
+        email.send_keys (entries['email'])
         phone = driver.find_element_by_id('contactForm-phoneNumber')
-        phone.send_keys('{phone}'.format_map(entries))
+        phone.send_keys(entries['phone'])
         street = driver.find_element_by_id('contactForm-street')
-        street.send_keys('{street}'.format_map(entries))
+        street.send_keys(entries['street'])
         house = driver.find_element_by_id('contactForm-houseNumber')
-        house.send_keys('{house}'.format_map(entries))
+        house.send_keys(entries['house'])
         post_code = driver.find_element_by_id('contactForm-postcode')
-        post_code.send_keys('{post_code}'.format_map(entries))
+        post_code.send_keys(entries['post_code'])
         city = driver.find_element_by_id('contactForm-city')
-        city.send_keys('{city}'.format_map(entries))
+        city.send_keys(entries['city'])
         time.sleep(1)
         #driver.find_element_by_xpath("//button[@data-ng-click='submit()' or contains(.,'Anfrage senden')]").click()
     except Exception as e:
@@ -64,18 +62,19 @@ def submit(link, driver, entries):
 
 
 if __name__ == '__main__':
-    #url = 'https://www.immobilienscout24.de/Suche/S-2/Wohnung-Miete/Berlin/Berlin/Friedrichshain-Friedrichshain_Mitte-Mitte_Prenzlauer-Berg-Prenzlauer-Berg/1,50-/-/EURO--700,00/-/3,6,7,8,40,113,118,127/false/-/-/true?enteredFrom=result_list'
-    #chrome_path = "/users/mozi/Documents/programing/chromedriver"
-    #driver = webdriver.Chrome(executable_path=chrome_path)
-    #driver = webdriver.Safari()
-
-    chrome_path = r"H:\sonstiges\python\chromedriver.exe"
-    driver = webdriver.Chrome(chrome_path)
     try:
         with open('data.json', 'r', encoding='utf-8') as fp:
             entries = json.load(fp)
     except:
-        print('[ERROR]: no entries found pls first fill out info form!')
+        print('[ERROR]: no entries found pls fill out info form first!')
+        exit()
+
+    try:
+        chrome_path = entries['chrome_path']
+        driver = webdriver.Chrome(chrome_path)
+    except:
+        driver = webdriver.Safari()
+        
 
     while True:
         try:
