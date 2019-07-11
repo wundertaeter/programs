@@ -7,6 +7,7 @@ class gui(object):
         self.__entries = {}
         self.fields =[]
         self.text_field = False
+        self.file_to_execute = ''
 
     def fetch(self):
         entries = {}
@@ -19,7 +20,7 @@ class gui(object):
         with open('data.json', 'w', encoding='utf-8') as fp:
             json.dump(entries, fp)
         try:
-            print('start_the_subprocess')
+            print('start_the_subprocess {}'.format(self.file_to_execute))
         except Exception as e:
             print(e)
 
@@ -64,4 +65,5 @@ if __name__ == '__main__':
                   'email', 'phone', 'street', 'house',
                   'post_code', 'city']
     gui.text_field = True
+    gui.file_to_execute = './web_bot.py'
     gui.run()
