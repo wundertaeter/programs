@@ -77,10 +77,10 @@ if __name__ == '__main__':
         
 
     while True:
-        try:
-            driver.get(entries['url'])
-        except Exception as e:
-            print('[DRIVER GET ERROR]', e)
+        #try:
+        driver.get(entries['url'])
+        #except Exception as e:
+        #    print('[DRIVER GET ERROR]', e)
 
         posts = driver.find_elements_by_class_name("result-list-entry__brand-title-container")
         flats = []
@@ -100,7 +100,7 @@ if __name__ == '__main__':
                 cursor.execute("INSERT INTO blacklist VALUES (?)", (flat['link'],))
 
         time.sleep(30)
-        print('[RELOAD..]')
+        print('[RELOAD..] {}'.format(time.strftime('%a, %d %b %Y %H:%M:%S')))
 
 
 
