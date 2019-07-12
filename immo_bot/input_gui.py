@@ -73,7 +73,7 @@ class gui(object):
 try:
     if __name__ == '__main__':
         gui = gui()
-        gui.fields = ['url','last_name', 'first_name',
+        gui.fields = ['driver_path','url','last_name', 'first_name',
                     'email', 'phone', 'street', 'house',
                     'post_code', 'city']
         gui.text_field = True

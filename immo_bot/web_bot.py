@@ -81,14 +81,22 @@ if __name__ == '__main__':
         print('[ERROR]: no entries found pls fill out info form first!')
         exit()
 
-    try:
-        #chrome_path = entries['path']
-        chrome_path = path + '/chromedriver'
-        driver = webdriver.Chrome(chrome_path)
-    except:
-        driver = webdriver.Safari()
-        
-
+    if 'safari' in entries['driver_path'].lower():
+        try:
+            driver = webdriver.Safari()
+        except Exception as e:
+            print(e)
+            exit()
+    else:
+        try:
+            driver = webdriver.Chrome(entries['driver_path'])
+        except:
+            try:
+                driver = webdriver.Chrome(path + '/chromedriver')
+            except Exception as e:
+                print(e)
+                exit()
+    
     while True:
         driver.get(entries['url'])
 
