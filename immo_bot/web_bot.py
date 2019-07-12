@@ -15,8 +15,7 @@ cursor = connection.cursor()
 try:
     cursor.execute('SELECT * FROM blacklist')
 except:
-    cursor.execute('CREATE TABLE blacklist( title TEXT,\
-                                            link TEXT PRIMARY KEY)')
+    cursor.execute('CREATE TABLE blacklist( title TEXT, link TEXT PRIMARY KEY)')
 
 
 def check(key):
