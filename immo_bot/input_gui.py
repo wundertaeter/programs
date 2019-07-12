@@ -24,7 +24,7 @@ class gui(object):
 
         for field, entry in self.__entries.items():
             if field == 'text_area':
-                entries[field] = entry.get("1.0",END)
+                entries['text_area'] = entry.get("1.0",END).strip()
             else:
                 entries[field] = entry.get()
 

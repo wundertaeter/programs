@@ -37,8 +37,8 @@ def submit(link, driver, entries):
             if option.text == 'Herr':
                 option.click()
                 break
-        content = driver.find_element_by_xpath("""//*[@id="is24-expose-modal"]/div/div/div/div/div/div[1]/h4""").text.split()
 
+        content = driver.find_element_by_xpath("""//*[@id="is24-expose-modal"]/div/div/div/div/div/div[1]/h4""").text.split()
         if 'Herr' in content:
             i = content.index('Herr')
             salutation = 'Sehr geehrter {}, \n'.format(' '.join(content[i:]))
@@ -50,7 +50,7 @@ def submit(link, driver, entries):
 
         text_area = driver.find_element_by_id('contactForm-Message')
         text_area.clear()
-        text_area.send_keys(salutation+entries['text_area'].strip())
+        text_area.send_keys(salutation+entries['text_area'])
         last_name = driver.find_element_by_id('contactForm-lastName')
         last_name.send_keys(entries['last_name'])
         first_name = driver.find_element_by_id('contactForm-firstName')
@@ -90,10 +90,7 @@ if __name__ == '__main__':
         
 
     while True:
-        #try:
         driver.get(entries['url'])
-        #except Exception as e:
-        #    print('[DRIVER GET ERROR]', e)
 
         posts = driver.find_elements_by_class_name("result-list-entry__brand-title-container")
         flats = []
