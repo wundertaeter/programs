@@ -56,9 +56,9 @@ class gui(object):
         try:
             with open('data.json', 'r', encoding='utf-8') as fp:
                 self.default = json.load(fp)
-            self.makeform()
         except:
-            self.makeform()
+            pass
+        self.makeform()
         search_button = Button(self.root, text='Start', command=self.fetch, width=15)
         if self.text_field:
             search_button.pack(side=LEFT, fill=BOTH)
