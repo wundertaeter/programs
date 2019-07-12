@@ -25,14 +25,12 @@ def check(key):
 def submit(link, driver, entries):
     driver.get(link)
 
+    driver.find_element_by_xpath("""//*[@id="is24-expose-contact-bar-top"]/div/div/div[1]/div/div[2]/a""").click()
+
+
+    el = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, 'contactForm-salutation')))
     try:
-        driver.find_element_by_xpath("""//*[@id="is24-expose-contact-bar-top"]/div/div/div[1]/div/div[2]/a""").click()
-
-
-        el = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, 'contactForm-salutation'))
-        )
-
         for option in el.find_elements_by_tag_name('option'):
             if option.text == 'Herr':
                 option.click()
@@ -71,7 +69,7 @@ def submit(link, driver, entries):
         #driver.find_element_by_xpath("//button[@data-ng-click='submit()' or contains(.,'Anfrage senden')]").click()
 
     except Exception as e:
-        print('[contactForm ERROR]', e)
+        print('[contactForm]', e)
 
 if __name__ == '__main__':
     try:
@@ -81,7 +79,7 @@ if __name__ == '__main__':
         print('[ERROR]: no entries found pls fill out info form first!')
         exit()
 
-    if 'safari' in entries['driver_path'].lower():
+    if 'safari' in entries['webdriver'].lower():
         try:
             driver = webdriver.Safari()
         except Exception as e:
@@ -89,7 +87,7 @@ if __name__ == '__main__':
             exit()
     else:
         try:
-            driver = webdriver.Chrome(entries['driver_path'])
+            driver = webdriver.Chrome(entries['webdriver'])
         except:
             try:
                 driver = webdriver.Chrome(path + '/chromedriver')
