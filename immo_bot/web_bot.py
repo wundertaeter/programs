@@ -85,7 +85,7 @@ if __name__ == '__main__':
         except Exception as e:
             print(e)
             exit()
-    else:
+    elif 'chrome' in entries['webdriver'].lower():
         try:
             driver = webdriver.Chrome(entries['webdriver'])
         except:
@@ -94,6 +94,9 @@ if __name__ == '__main__':
             except Exception as e:
                 print(e)
                 exit()
+    else:
+        print('no support for "{}"'.format(entries['webdriver']))
+        exit()
     
     while True:
         driver.get(entries['url'])
