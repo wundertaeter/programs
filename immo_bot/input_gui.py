@@ -1,35 +1,72 @@
-try:
-    import json
-    from tkinter import *
-    from tkinter.scrolledtext import ScrolledText
-    #import appscript
-    import sys
 
-except Exception as e:
-    with open ('log.log', 'a') as f:
-        f.write(str(e))
+import json
+from tkinter import *
+from tkinter.scrolledtext import ScrolledText
+#import appscript
+import sys
+import sqlite3
+
 
 path = '/'.join(sys.argv[0].split('/')[:-1])
+connection = sqlite3.connect('./immo.db')
+cursor = connection.cursor()
+try:
+    cursor.execute('SELECT * FROM blacklist')
+except:
+    cursor.execute('CREATE TABLE blacklist( title TEXT, link TEXT PRIMARY KEY)')
+
 
 class gui(object):
-    def __init__(self):
+    def __init__(self, table='', column='', drop_label='', 
+                 text_field=False, fields=[], default={}, file_to_execute='', 
+                 sql=False):
         self.__entries = {}
-        self.default = {}
-        self.fields =[]
-        self.text_field = False
-        self.file_to_execute = ''
+        self.default = default
+        self.fields = fields
+        self.text_field = text_field
+        self.file_to_execute = file_to_execute
+        self.sql_args = {'column': column, 'table': table}
+        self.drop_label = drop_label
+        self.sql = sql
+        self.entries = {'test': False}
+
+    def test_true(self):
+        self.entries['test'] = True
+
+    def create_drob_down(self):
+        if self.sql:
+            cursor.execute('SELECT {column} FROM {table}'.format_map(self.sql_args))
+            list_of_tuples = cursor.fetchall()
+            choices = [tuple[0] for tuple in list_of_tuples]
+            if len(choices) == 0:
+                choices = ['refresh']
+            self.tkvar = StringVar(self.manu_frame)
+            self.tkvar.set(self.sql_args['table'])
+            popupMenu = OptionMenu(self.manu_frame, self.tkvar, *choices)
+            popupMenu.pack(side=RIGHT, fill=BOTH, expand=YES)
+            self.manu_frame.pack(side=TOP, fill=X)
+            self.tkvar.trace('w', self.trigger_drop_down)
+
+    def trigger_drop_down(self, *args):
+        self.sql_args['col_name'] = self.tkvar.get()
+        if self.sql_args['col_name'] != 'refresh':
+            with connection:
+                cursor.execute("DELETE FROM {table} WHERE {column} == '{col_name}'".format_map(self.sql_args))
+        
+        for l in self.manu_frame.pack_slaves():
+            if 'optionmenu' in str(l):
+                l.destroy()
+        self.create_drob_down() 
 
     def fetch(self):
-        entries = {}
-
         for field, entry in self.__entries.items():
             if field == 'text_area':
-                entries['text_area'] = entry.get("1.0",END).strip()
+                self.entries['text_area'] = entry.get("1.0",END).strip()
             else:
-                entries[field] = entry.get()
+                self.entries[field] = entry.get()
 
         with open('data.json', 'w', encoding='utf-8') as fp:
-            json.dump(entries, fp)
+            json.dump(self.entries, fp)
         try:
             #appscript.app('Terminal').do_script('python3 {}/web_bot.py'.format(path))
             print('starte python3 {}/web_bot.py'.format(path))
@@ -57,6 +94,11 @@ class gui(object):
 
     def run(self):
         self.root = Tk()
+        self.manu_frame = Frame(self.root)
+        test_button = Button(self.manu_frame, text='test', command=self.test_true, width=15)
+        test_button.pack(side=LEFT, fill=BOTH)
+        self.create_drob_down()
+
         try:
             with open('data.json', 'r', encoding='utf-8') as fp:
                 self.default = json.load(fp)
@@ -68,18 +110,16 @@ class gui(object):
             search_button.pack(side=LEFT, fill=BOTH)
         else:
             search_button.pack(side=BOTTOM, fill=BOTH)
+
         self.root.mainloop()
 
-try:
-    if __name__ == '__main__':
-        gui = gui()
-        gui.fields = ['webdriver','url','last_name', 'first_name',
-                    'email', 'phone', 'street', 'house',
-                    'post_code', 'city']
-        gui.text_field = True
-        gui.file_to_execute = './web_bot.py'
-        gui.run()
-except Exception as e:
-    with open ('log.log', 'a') as f:
-        f.write(str(e))
+
+if __name__ == '__main__':
+    gui = gui(table='blacklist', column='title', 
+                text_field=True, file_to_execute='./web_bot.py', sql=True)
+    gui.fields = ['webdriver','url','last_name', 'first_name',
+                'email', 'phone', 'street', 'house',
+                'post_code', 'city']
+    gui.run()
+
 

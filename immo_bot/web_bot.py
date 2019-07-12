@@ -68,9 +68,13 @@ def submit(link, driver, entries):
         city = driver.find_element_by_id('contactForm-city')
         city.send_keys(entries['city'])
         time.sleep(2)
-        #driver.find_element_by_xpath("//button[@data-ng-click='submit()'\
-        #                             or contains(.,'Anfrage senden')]").click()
-
+        if not entries['test']:
+            print('submitted')
+            #driver.find_element_by_xpath("//button[@data-ng-click='submit()'\
+            #                         or contains(.,'Anfrage senden')]").click()
+            with connection:
+                cursor.execute("INSERT INTO blacklist VALUES (?,?)",
+                                      (flat['title'],flat['link'],))
     except Exception as e:
         print('[contactForm]', e)
 
@@ -120,9 +124,7 @@ if __name__ == '__main__':
         for flat in flats:
             print(flat['title'])
             submit(flat['link'], driver, entries)
-            with connection:
-                cursor.execute("INSERT INTO blacklist VALUES (?,?)",
-                                      (flat['title'],flat['link'],))
+            
 
         time.sleep(30)
         print('[RELOAD..] {}'.format(time.strftime('%a, %d %b %Y %H:%M:%S')))
