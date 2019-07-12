@@ -15,7 +15,8 @@ cursor = connection.cursor()
 try:
     cursor.execute('SELECT * FROM blacklist')
 except:
-    cursor.execute('CREATE TABLE blacklist(link TEXT PRIMARY KEY)')
+    cursor.execute('CREATE TABLE blacklist( title TEXT,\
+                                            link TEXT PRIMARY KEY)')
 
 
 def check(key):
@@ -25,7 +26,8 @@ def check(key):
 def submit(link, driver, entries):
     driver.get(link)
 
-    driver.find_element_by_xpath("""//*[@id="is24-expose-contact-bar-top"]/div/div/div[1]/div/div[2]/a""").click()
+    driver.find_element_by_xpath("""//*[@id="is24-expose-contact-bar-top"]\
+                                 /div/div/div[1]/div/div[2]/a""").click()
 
 
     el = WebDriverWait(driver, 10).until(
@@ -36,7 +38,8 @@ def submit(link, driver, entries):
                 option.click()
                 break
 
-        content = driver.find_element_by_xpath("""//*[@id="is24-expose-modal"]/div/div/div/div/div/div[1]/h4""").text.split()
+        content = driver.find_element_by_xpath("""//*[@id="is24-expose-modal"]\
+                                 /div/div/div/div/div/div[1]/h4""").text.split()
         if 'Herr' in content:
             i = content.index('Herr')
             salutation = 'Sehr geehrter {}, \n'.format(' '.join(content[i:]))
@@ -66,7 +69,8 @@ def submit(link, driver, entries):
         city = driver.find_element_by_id('contactForm-city')
         city.send_keys(entries['city'])
         time.sleep(2)
-        #driver.find_element_by_xpath("//button[@data-ng-click='submit()' or contains(.,'Anfrage senden')]").click()
+        #driver.find_element_by_xpath("//button[@data-ng-click='submit()'\
+        #                             or contains(.,'Anfrage senden')]").click()
 
     except Exception as e:
         print('[contactForm]', e)
@@ -101,7 +105,8 @@ if __name__ == '__main__':
     while True:
         driver.get(entries['url'])
 
-        posts = driver.find_elements_by_class_name("result-list-entry__brand-title-container")
+        posts = driver.find_elements_by_class_name(
+                                     "result-list-entry__brand-title-container")
         flats = []
 
         for post in posts:
@@ -117,7 +122,8 @@ if __name__ == '__main__':
             print(flat['title'])
             submit(flat['link'], driver, entries)
             with connection:
-                cursor.execute("INSERT INTO blacklist VALUES (?)", (flat['link'],))
+                cursor.execute("INSERT INTO blacklist VALUES (?,?)",
+                                      (flat['title'],flat['link'],))
 
         time.sleep(30)
         print('[RELOAD..] {}'.format(time.strftime('%a, %d %b %Y %H:%M:%S')))
