@@ -1,6 +1,15 @@
-import json
-from tkinter import *
-from tkinter.scrolledtext import ScrolledText
+try:
+    import json
+    from tkinter import *
+    from tkinter.scrolledtext import ScrolledText
+    #import appscript
+    import sys
+
+except Exception as e:
+    with open ('log.log', 'a') as f:
+        f.write(str(e))
+
+path = '/'.join(sys.argv[0].split('/')[:-1])
 
 class gui(object):
     def __init__(self):
@@ -12,6 +21,7 @@ class gui(object):
 
     def fetch(self):
         entries = {}
+
         for field, entry in self.__entries.items():
             if field == 'text_area':
                 entries[field] = entry.get("1.0",END)
@@ -21,10 +31,10 @@ class gui(object):
         with open('data.json', 'w', encoding='utf-8') as fp:
             json.dump(entries, fp)
         try:
-            print('start_the_subprocess {}'.format(self.file_to_execute))
+            #appscript.app('Terminal').do_script('python3 {}/web_bot.py'.format(path))
+            print('starte python3 {}/web_bot.py'.format(path))
         except Exception as e:
             print(e)
-
 
     def makeform(self):
         for field in self.fields:
@@ -60,11 +70,16 @@ class gui(object):
             search_button.pack(side=BOTTOM, fill=BOTH)
         self.root.mainloop()
 
-if __name__ == '__main__':
-    gui = gui()
-    gui.fields = ['url','last_name', 'first_name',
-                  'email', 'phone', 'street', 'house',
-                  'post_code', 'city']
-    gui.text_field = True
-    gui.file_to_execute = './web_bot.py'
-    gui.run()
+try:
+    if __name__ == '__main__':
+        gui = gui()
+        gui.fields = ['url','last_name', 'first_name',
+                    'email', 'phone', 'street', 'house',
+                    'post_code', 'city']
+        gui.text_field = True
+        gui.file_to_execute = './web_bot.py'
+        gui.run()
+except Exception as e:
+    with open ('log.log', 'a') as f:
+        f.write(str(e))
+
