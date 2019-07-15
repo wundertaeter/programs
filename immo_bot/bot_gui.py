@@ -1,10 +1,11 @@
-
 import json
 from tkinter import *
 from tkinter.scrolledtext import ScrolledText
 #import appscript
 import sys
 import sqlite3
+import sys
+import subprocess
 
 
 path = '/'.join(sys.argv[0].split('/')[:-1])
@@ -68,6 +69,8 @@ class gui(object):
         with open('data.json', 'w', encoding='utf-8') as fp:
             json.dump(self.entries, fp)
         try:
+            subprocess.Popen([sys.executable, path+"/web_bot.py"], creationflags=subprocess.CREATE_NEW_CONSOLE)
+            #theproc.communicate()
             #appscript.app('Terminal').do_script('python3 {}/web_bot.py'.format(path))
             print('starte python3 {}/web_bot.py'.format(path))
         except Exception as e:
@@ -121,5 +124,3 @@ if __name__ == '__main__':
                 'email', 'phone', 'street', 'house',
                 'post_code', 'city']
     gui.run()
-
-
