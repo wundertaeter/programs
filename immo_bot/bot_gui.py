@@ -100,7 +100,7 @@ class gui(object):
     def run(self):
         self.root = Tk()
         self.manu_frame = Frame(self.root)
-        self.test_button = Button(self.manu_frame, text='test', command=self.ch_mode, width=8)
+        self.test_button = Button(self.manu_frame, text='test', command=self.ch_mode, width=15)
         self.test_button.pack(side=LEFT, fill=BOTH)
         self.create_drob_down()
 
