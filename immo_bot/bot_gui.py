@@ -121,7 +121,7 @@ class gui(object):
 
 if __name__ == '__main__':
     gui = gui(table='blacklist', column='title', 
-                text_field=True, file_to_execute='./web_bot.py', sql=True)
+                text_field=True, file_to_execute='web_bot.py', sql=True)
     gui.fields = ['webdriver','url','last_name', 'first_name',
                 'email', 'phone', 'street', 'house',
                 'post_code', 'city']
