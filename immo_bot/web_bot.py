@@ -59,22 +59,25 @@ def submit(link, driver, entries):
         email.send_keys (entries['email'])
         phone = driver.find_element_by_id('contactForm-phoneNumber')
         phone.send_keys(entries['phone'])
-        street = driver.find_element_by_id('contactForm-street')
-        street.send_keys(entries['street'])
-        house = driver.find_element_by_id('contactForm-houseNumber')
-        house.send_keys(entries['house'])
-        post_code = driver.find_element_by_id('contactForm-postcode')
-        post_code.send_keys(entries['post_code'])
-        city = driver.find_element_by_id('contactForm-city')
-        city.send_keys(entries['city'])
-        time.sleep(2)
+
+        try:
+            street = driver.find_element_by_id('contactForm-street')
+            street.send_keys(entries['street'])
+            house = driver.find_element_by_id('contactForm-houseNumber')
+            house.send_keys(entries['house'])
+            post_code = driver.find_element_by_id('contactForm-postcode')
+            post_code.send_keys(entries['post_code'])
+            city = driver.find_element_by_id('contactForm-city')
+            city.send_keys(entries['city'])
+        except:
+            # form dont need Contackt information
+            pass
+
+        time.sleep(1)
         if not entries['test']:
             print('submitted')
-            #driver.find_element_by_xpath("//button[@data-ng-click='submit()'\
-            #                         or contains(.,'Anfrage senden')]").click()
-            with connection:
-                cursor.execute("INSERT INTO blacklist VALUES (?,?)",
-                                      (flat['title'],flat['link'],))
+            driver.find_element_by_xpath("//button[@data-ng-click='submit()'\
+                                     or contains(.,'Anfrage senden')]").click()
     except Exception as e:
         print('[contactForm]', e)
 
@@ -85,6 +88,11 @@ if __name__ == '__main__':
     except:
         print('[ERROR]: no entries found pls fill out info form first!')
         exit()
+    
+    if entries['test']:
+        print('[TEST-MODE] enabled')
+    else:
+        print('[TEST-MODE] disabled')
 
     if 'safari' in entries['webdriver'].lower():
         try:
@@ -124,6 +132,9 @@ if __name__ == '__main__':
         for flat in flats:
             print(flat['title'])
             submit(flat['link'], driver, entries)
+            with connection:
+                cursor.execute("INSERT INTO blacklist VALUES (?,?)",
+                                      (flat['title'],flat['link'],))
             
 
         time.sleep(30)

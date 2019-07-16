@@ -1,3 +1,4 @@
+
 import json
 from tkinter import *
 from tkinter.scrolledtext import ScrolledText
@@ -31,16 +32,19 @@ class gui(object):
         self.sql = sql
         self.entries = {'test': False}
 
-    def test_true(self):
-        self.entries['test'] = True
+    def ch_mode(self):
+        self.entries['test'] = not self.entries['test']
+        if self.entries['test']:
+            self.test_button.config(bg="green")
+        else:
+            self.test_button.config(bg='SystemButtonFace')
 
     def create_drob_down(self):
         if self.sql:
             cursor.execute('SELECT {column} FROM {table}'.format_map(self.sql_args))
             list_of_tuples = cursor.fetchall()
             choices = [tuple[0] for tuple in list_of_tuples]
-            if len(choices) == 0:
-                choices = ['refresh']
+            choices.append(['refresh'])
             self.tkvar = StringVar(self.manu_frame)
             self.tkvar.set(self.sql_args['table'])
             popupMenu = OptionMenu(self.manu_frame, self.tkvar, *choices)
@@ -50,7 +54,7 @@ class gui(object):
 
     def trigger_drop_down(self, *args):
         self.sql_args['col_name'] = self.tkvar.get()
-        if self.sql_args['col_name'] != 'refresh':
+        if 'refresh' not in self.sql_args['col_name']:
             with connection:
                 cursor.execute("DELETE FROM {table} WHERE {column} == '{col_name}'".format_map(self.sql_args))
         
@@ -70,7 +74,6 @@ class gui(object):
             json.dump(self.entries, fp)
         try:
             subprocess.Popen([sys.executable, path+"/web_bot.py"], creationflags=subprocess.CREATE_NEW_CONSOLE)
-            #theproc.communicate()
             #appscript.app('Terminal').do_script('python3 {}/web_bot.py'.format(path))
             print('starte python3 {}/web_bot.py'.format(path))
         except Exception as e:
@@ -98,8 +101,8 @@ class gui(object):
     def run(self):
         self.root = Tk()
         self.manu_frame = Frame(self.root)
-        test_button = Button(self.manu_frame, text='test', command=self.test_true, width=15)
-        test_button.pack(side=LEFT, fill=BOTH)
+        self.test_button = Button(self.manu_frame, text='test', command=self.ch_mode, width=8)
+        self.test_button.pack(side=LEFT, fill=BOTH)
         self.create_drob_down()
 
         try:
@@ -124,3 +127,5 @@ if __name__ == '__main__':
                 'email', 'phone', 'street', 'house',
                 'post_code', 'city']
     gui.run()
+
+
