@@ -8,7 +8,7 @@ import sys
 import subprocess
 
 
-path = '/'.join(sys.argv[0].split('/')[:-1])
+path = '/'.join(sys.argv[0].split('/')[:-1]) + '/'
 connection = sqlite3.connect('./immo.db')
 cursor = connection.cursor()
 try:
@@ -72,9 +72,9 @@ class gui(object):
         with open('data.json', 'w', encoding='utf-8') as fp:
             json.dump(self.entries, fp)
         try:
-            subprocess.Popen([sys.executable, path+"/web_bot.py"], creationflags=subprocess.CREATE_NEW_CONSOLE)
+            subprocess.Popen([sys.executable, path + self.file_to_execute], creationflags=subprocess.CREATE_NEW_CONSOLE)
             #appscript.app('Terminal').do_script('python3 {}/web_bot.py'.format(path)) Mac os only
-            print('starte python3 {}/web_bot.py'.format(path))
+            print('starte python3 {}'.format(path + self.file_to_execute))
         except Exception as e:
             print(e)
 
