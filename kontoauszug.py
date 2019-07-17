@@ -167,7 +167,7 @@ class gui(object):
             self.search_field = Entry(self.root, bd=5, width=40)
             self.search_field.grid(row=0, column=1, sticky=(N, W, E, S))
 
-    def next_site(self):
+    def next_site(self, klick=''):
         if len(self.sites) > 0:
             if self.i == len(self.sites)-1:
                 self.i = 0
@@ -175,7 +175,7 @@ class gui(object):
                 self.i += 1
             self.display.config(text=self.sites[self.i])
 
-    def previous_site(self):
+    def previous_site(self, klick=''):
         if len(self.sites) > 0:
             if self.i == (len(self.sites)-1)*(-1):
                 self.i = 0
@@ -252,8 +252,8 @@ class gui(object):
         self.root = Tk()
         self.root.title('Kontoauszug Converter')
         self.root.bind('<Return>', self.search)
-        self.root.bind('<Left>', self.previous_site())
-        self.root.bind('<Right>', self.next_site())
+        self.root.bind('<Left>', self.previous_site)
+        self.root.bind('<Right>', self.next_site)
         self.init()
         mainloop()
 
