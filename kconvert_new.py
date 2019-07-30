@@ -1,9 +1,11 @@
 from tkinter import *
+from tkinter import filedialog
 import PyPDF2
 from datetime import datetime
 import os
 import xlsxwriter
 import xlrd
+import json
 
 location = os.path.expanduser('~')
 
@@ -134,7 +136,7 @@ def convert(pdf_names, path, mode='w'):
     if not os.path.exists(file):
         workbook = xlsxwriter.Workbook(file)
         worksheet = workbook.add_worksheet()
-        columns = ['Datum', 'Wert', 'Erläuterung', 
+        columns = ['Datum', 'Wert', 'Erläuterung', 
                    'Betrag Soll EUR', 'Betrag Haben EUR']
         for i in range(len(columns)):
             worksheet.write(0, i, columns[i])
@@ -168,50 +170,38 @@ def convert(pdf_names, path, mode='w'):
 class gui(object):
     def __init__(self):
         self.root = Tk()
-        self.data = {'Directory':   {'frame': Frame(self.root),
-                                     'funk1': self.search_dir, 
-                                     'funk2': self.change_dropdown_dir},
-
-                     'File':        {'frame': Frame(self.root),
-                                     'funk2': self.change_dropdown_file},
-
-                     'Excel Table': {'frame': Frame(self.root),
-                                     'funk1': self.search_excel, 
-                                     'funk2': self.change_dropdown_excel}
-                    }
+        self.data = {'Directory Open': {'frame': Frame(self.root)},
+                     'Directory Save': {'frame': Frame(self.root)}}
+        if os.path.exists('entries.json'):
+            with open('entries.json', 'r', encoding='utf-8') as fp:
+                self.entries = json.load(fp)
+        else:
+            self.entries = {'open_dir': 'Ordner wählen', 'initialdir': '/'}
         self.i = 0
 
-    def select(self, name):
-        dir = self.data[name]['field'].get()
-        paths = find_all(dir)
+    def open_file(self, *args):
+        print(self.data['Directory Open']['tkvar'].get())
 
-        if len(paths) > 1:
-            label='multiple options'
-        else:
-            label = name
+    def dump(self, key, value):
+        self.entries[key] = value
+        with open('entries.json', 'w', encoding='utf-8') as fp:
+            json.dump(self.entries, fp)
+        
 
-        self.create_drob_down(name, label=label, choices=paths)
-        return paths
+    def save_file(self):
+        filename = filedialog.asksaveasfilename(initialdir = self.entries['initialdir'],title = "Select file")
+        self.dump('initialdir', '/'.join(filename.split('/')[:-1]))
+        self.save_b.config(text=filename.split('/')[-2])
 
-    def search_dir(self):
-        paths = self.select('Directory')
-        list_of_files = [name for name in os.listdir(paths[0]) if name.endswith('.PDF')]
-        self.create_drob_down('File', label='Files', choices=list_of_files)
-    
-    def search_excel(self):
-        print(self.data['Excel Table']['field'].get())
+    def open_dir(self):
+        self.dump('open_dir', filedialog.askdirectory())
+        files = [name for name in os.listdir(self.entries['open_dir']) if name.endswith('.PDF')]
+        if len(files) == 0:
+            files = ['Keine PDF Dateien gefunden']
+        self.create_drob_down('Directory Open', funk=self.open_file, label='Files', choices=files)
+        self.open_b.config(text=self.entries['open_dir'].split('/')[-1])
 
-
-    def change_dropdown_dir(self, *args):
-        print(self.data['Directory']['tkvar'].get())
-    
-    def change_dropdown_file(self, *args):
-        print(self.data['File']['tkvar'].get())
-    
-    def change_dropdown_excel(self, *args):
-        print(self.data['Excel Table']['tkvar'].get())
-
-    def create_drob_down(self, name, label='', choices=['..']):
+    def create_drob_down(self, name, funk, label='', choices=['..']):
         for ps in self.data[name]['frame'].pack_slaves():
             if 'option' in str(ps):
                 ps.destroy()
@@ -221,26 +211,28 @@ class gui(object):
         popupMenu = OptionMenu(self.data[name]['frame'], self.data[name]['tkvar'], *choices)
         popupMenu.pack(side=RIGHT, fill=BOTH, expand=YES)
 
-        self.data[name]['tkvar'].trace('w', self.data[name]['funk2'])
-
+        self.data[name]['tkvar'].trace('w', funk)
         self.data[name]['frame'].pack(side=TOP, fill=BOTH, expand=YES)
 
-    def makeform(self, name, label, choices=['..']):
-
-        button = Button(self.data[name]['frame'], text=label, command=self.data[name]['funk1'], width=10)
-        button.pack(side=LEFT)
-
-        self.data[name]['field'] = Entry(self.data[name]['frame'], bd=5, width=40)
-        self.data[name]['field'].pack(side=LEFT)
-        self.create_drob_down(name, label=name, choices=choices)
-
     def run(self):
-        self.makeform('Directory', label='Search')
-        self.create_drob_down('File', label='File')
+        b_text = self.entries['open_dir'].split('/')[-1]
+        self.open_b = Button(self.data['Directory Open']['frame'], text=b_text, command=self.open_dir)
+        self.open_b.pack(side=LEFT)
+        if self.entries['open_dir'] != 'Ordner wählen':
+            files = [name for name in os.listdir(self.entries['open_dir']) if name.endswith('.PDF')]
+        else:
+            files = ['..']
+        self.create_drob_down('Directory Open', funk=self.open_file, label='File', choices=files)
+        
         label = Label(self.root, justify=LEFT)
         label.pack(side=TOP)
         label.config(text='\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
-        self.makeform('Excel Table', label='Save As')
+        
+        self.save_b = Button(self.data['Directory Save']['frame'], text='Save As', command=self.save_file)
+        self.save_b.pack(side=LEFT)
+        if self.entries['initialdir'] != '/':
+            self.save_b.config(text=self.entries['initialdir'].split('/')[-1])
+        self.data['Directory Save']['frame'].pack(side=BOTTOM)
         self.root.mainloop()
 
 if __name__ == '__main__':
