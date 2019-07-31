@@ -174,7 +174,7 @@ class gui(object):
         self.blacklist.append(filename)
         files = [name for name in self.files if name not in self.blacklist]
         if len(files) == 0:
-            files = ['Bereits alle convertiert'] 
+            files = ['Bereits alle Dateien convertiert'] 
         self.create_drob_down('Directory Open', funk=self.open_file, label='File', choices=files)
         if kto is not None:
             self.ktos.append(kto)
@@ -205,7 +205,6 @@ class gui(object):
             self.show_sites()
 
     def show_sites(self):
-        #self.info_l2.config(text=)
         for ps in self.table_f.pack_slaves():
             ps.destroy()
 
