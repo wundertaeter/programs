@@ -164,12 +164,15 @@ class gui(object):
         else:
             self.entries = {'open_dir': '/', 'save_file': '/'}
         self.blacklist = []
-        self.ktos = []
+        self.ktos = [{'all_rows':[[['','','','']]], 'name': '', 'num_rows': [0]}]
+        self.kto_count = 0
         self.i = 0
         self.kto_i = 0
 
     def open_file(self, *args):
         filename = self.data['Directory Open']['tkvar'].get()
+        if filename == 'Bereits alle Dateien convertiert':
+            return
         kto = cv.convert(filename, self.entries['open_dir'])
         self.blacklist.append(filename)
         files = [name for name in self.files if name not in self.blacklist]
@@ -177,8 +180,12 @@ class gui(object):
             files = ['Bereits alle Dateien convertiert'] 
         self.create_drob_down('Directory Open', funk=self.open_file, label='File', choices=files)
         if kto is not None:
-            self.ktos.append(kto)
-        self.show_sites()
+            if self.kto_count == 0:
+                self.ktos = [kto]
+            else:
+                self.ktos.append(kto)
+            self.kto_count += 1
+            self.show_sites()
     
     def next_site(self):
         if len(self.ktos) > 0:
@@ -330,22 +337,8 @@ class gui(object):
         sites.pack(side=TOP, fill=BOTH, expand=YES)
 
         self.table_f = Frame(self.root)
-        self.name_l = Label(self.table_f, justify=LEFT)
-        self.name_l.pack(side=TOP, fill=BOTH, expand=YES)
 
-        for _ in range(15):
-            f = Frame(self.table_f)
-            for _ in range(5): 
-                b = Entry(f, text='')
-                b.pack(side=LEFT)
-            f.pack(side=TOP)
-        
-        self.info_l = Label(self.table_f)
-        self.info_l.pack(side=LEFT)
-
-        self.info_l2 = Label(self.table_f)
-        self.info_l2.pack(side=RIGHT)
-
+        self.show_sites()
         self.table_f.pack(side=TOP)
 
         Label(self.root, bg='grey').pack(side=TOP, fill=BOTH, expand=YES)
