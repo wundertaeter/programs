@@ -31,7 +31,7 @@ class kto_ausz_Parser(object):
             row = self.__parse_date(format_in, format_out)
             row += self.__parse_description()
             row += self.__parse_amount()
-            self.rows.append(row)
+            self.rows.append(list(row))
 
     def __parse_date(self, format_in, format_out):
         found = False
@@ -121,7 +121,10 @@ class converter(object):
     def __init__(self):
         self.kto_objects = []
 
-    def save_as(self, filename):
+    def save_as(self, filename, sites):
+        for site in sites:
+            for i in range(len(site['all_rows'])):
+                self.kto_objects[i].rows = site['all_rows'][i]
         if not os.path.exists(filename):
             workbook = xlsxwriter.Workbook(filename)
             worksheet = workbook.add_worksheet()
@@ -153,19 +156,18 @@ class converter(object):
             number_of_pages = read_pdf.getNumPages()
 
             num_rows = []
-            pages = []
+            all_rows = []
             for number in range(number_of_pages):
                 page = read_pdf.getPage(number)
                 page_content = page.extractText()
                 parsed_kto_ausz = kto_ausz_Parser(page_content, '%d.%m.%Y', '%d.%m.%Y')
 
                 if len(parsed_kto_ausz.rows) > 0:
-                    s = parsed_kto_ausz.to_string()
-                    pages.append(s)
+                    all_rows.append(parsed_kto_ausz.rows)
                     num_rows.append(len(parsed_kto_ausz.rows))
                     self.kto_objects.append(parsed_kto_ausz)
 
-            all_pages.extend(self.beautify(name, pages, num_rows))
+            all_pages.append({'name': name, 'all_rows': all_rows, 'num_rows': num_rows})
 
         return all_pages
 
@@ -184,6 +186,7 @@ class gui(object):
             self.entries = {'open_dir': '/', 'save_file': '/'}
         self.sites = []
         self.i = 0
+        self.kto_i = 0
 
     def open_file(self, *args):
         filename = self.data['Directory Open']['tkvar'].get()
@@ -192,23 +195,85 @@ class gui(object):
         else:
             pdf_names = [filename]
         self.sites = cv.convert(pdf_names, self.entries['open_dir'])
-        self.display.config(text=self.sites[self.i])
+        self.show_sites()
     
     def next_site(self):
         if len(self.sites) > 0:
-            if self.i == len(self.sites)-1:
+            if self.i == len(self.sites[self.kto_i]['all_rows']) - 1:
+                if self.kto_i == len(self.sites)-1:
+                    self.kto_i = 0
+                else:
+                    self.kto_i += 1
                 self.i = 0
             else:
                 self.i += 1
-            self.display.config(text=self.sites[self.i])
+            self.show_sites()
 
     def previous_site(self):
         if len(self.sites) > 0:
-            if self.i == (len(self.sites)-1)*(-1):
+            if self.i == (len(self.sites[self.kto_i]['all_rows'])-1)*(-1):
+                if self.kto_i == (len(self.sites)-1)*(-1):
+                    self.kto_i = 0
+                else:
+                    self.kto_i -= 1
                 self.i = 0
             else:
                 self.i -= 1
-            self.display.config(text=self.sites[self.i])
+            self.show_sites()
+
+    def show_sites(self):
+        #self.info_l2.config(text=)
+        for ps in self.table_f.pack_slaves():
+            ps.destroy()
+
+        self.name_l = Label(self.table_f, justify=LEFT, text=self.sites[self.kto_i]['name'])
+        self.name_l.pack(side=TOP, fill=BOTH, expand=YES)
+        
+        for row in self.sites[self.kto_i]['all_rows'][self.i]:
+            f = Frame(self.table_f)
+            for value in row:
+                if value == row[-1]:
+                    if '-' in value:
+                        b = Entry(f, text='')
+                        b.insert(END, value)
+                        b.pack(side=LEFT)
+                        Entry(f, text='').pack(side=LEFT)
+                    elif '+' in value:
+                        Entry(f, text='').pack(side=LEFT)
+                        b = Entry(f, text='')
+                        b.insert(END, value)
+                        b.pack(side=LEFT)
+                else:
+                    b = Entry(f, text='')
+                    b.insert(END, value)
+                    b.pack(side=LEFT)
+                        
+            f.pack(side=TOP)
+
+        self.info_l = Label(self.table_f, text='Buchungszeilen {}'.format(self.sites[self.kto_i]['num_rows'][self.i]))
+        self.info_l.pack(side=LEFT)
+
+       
+        if self.i < 0:
+            page_count = len(self.sites[self.kto_i]['all_rows']) + self.i
+        else:
+            page_count = self.i
+        
+        self.info_l2 = Label(self.table_f, text='Page {}/{}'.format(page_count + 1, len(self.sites[self.kto_i]['all_rows'])))
+        self.info_l2.pack(side=RIGHT)
+        
+    def fetch(self, *args):
+        i = 0
+        for ps in self.table_f.pack_slaves():
+            if 'frame' in str(ps):
+                print(len(ps.pack_slaves()))
+                if len(ps.pack_slaves()) == 5:
+                    for j in range(4):
+                        p = ps.pack_slaves()[j] 
+                        if len(p.get()) == 0:
+                            p = ps.pack_slaves()[4] 
+                        self.sites[self.kto_i]['all_rows'][self.i][i][j] = p.get()
+                    i += 1
 
     def dump(self, key, value):
         self.entries[key] = value
@@ -223,7 +288,7 @@ class gui(object):
             if len(filename) > 0: 
                 self.dump('save_file', '/'.join(filename.split('/')))
                 self.save_as_l.config(text=filename.split('/')[-1])
-                cv.save_as(self.entries['save_file'])
+                cv.save_as(self.entries['save_file'], self.sites)
     
     def open_dir(self):
         dir = filedialog.askdirectory(initialdir=self.entries['open_dir'])
@@ -269,9 +334,14 @@ class gui(object):
         Button(sites, command=self.previous_site, text='previous Site', width=10).pack(side=LEFT)
         sites.pack(side=TOP, fill=BOTH, expand=YES)
 
-        self.display = Label(self.root, justify=LEFT)
-        self.display.pack(side=TOP)
-        self.display.config(text='\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
+        self.table_f = Frame(self.root)
+        for _ in range(5):
+            f = Frame(self.table_f)
+            for _ in range(5): 
+                b = Entry(f, text='')
+                b.pack(side=LEFT)
+            f.pack(side=TOP)
+        self.table_f.pack(side=TOP)
         
         Label(self.root, bg='grey').pack(side=TOP, fill=BOTH, expand=YES)
 
@@ -283,8 +353,9 @@ class gui(object):
         if self.entries['save_file'] != '/':
             self.save_as_l.config(text=self.entries['save_file'].split('/')[-1])
 
-        self.data['Directory Save']['frame'].pack(side=TOP, fill=BOTH, expand=YES)
+        self.data['Directory Save']['frame'].pack(side=BOTTOM, fill=BOTH, expand=YES)
 
+        self.root.bind('<Return>', self.fetch)
         self.root.mainloop()
 
 if __name__ == '__main__':
