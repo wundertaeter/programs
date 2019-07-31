@@ -87,11 +87,12 @@ class kto_ausz_Parser(object):
         s += ' -------------------------------------------------------------------------------------------------------------------------------------\n'
         return s
     
-    def to_xlsx(self, file):
-        wbRD = xlrd.open_workbook(file)
+class converter(object):
+    def to_xlsx(self, filename, all_rows):
+        wbRD = xlrd.open_workbook(filename)
         sheets = wbRD.sheets()
 
-        wb = xlsxwriter.Workbook(file)
+        wb = xlsxwriter.Workbook(filename)
 
         for sheet in sheets:
             newSheet = wb.add_worksheet(sheet.name)
@@ -102,30 +103,23 @@ class kto_ausz_Parser(object):
         col = 0
         row_num = sheet.nrows
 
-        for row in self.rows:
-            for value in row:
-                if value == row[-1]:
-                    if '-' in value:
-                        newSheet.write(row_num, col, value+'\t\n')
-                    elif '+' in value:
-                        newSheet.write(row_num, col+1,'\t'+value+'\n')
-                else:
-                    newSheet.write(row_num, col, value+'\t')
-                col += 1
-            row_num += 1
-            col = 0
+        for rows in all_rows:
+            for row in rows:
+                for value in row:
+                    if value == row[-1]:
+                        if '-' in value:
+                            newSheet.write(row_num, col, value+'\t\n')
+                        elif '+' in value:
+                            newSheet.write(row_num, col+1,'\t'+value+'\n')
+                    else:
+                        newSheet.write(row_num, col, value+'\t')
+                    col += 1
+                row_num += 1
+                col = 0
         
         wb.close()
 
-class converter(object):
-    def __init__(self):
-        self.kto_objects = []
-
-    def save_as(self, filename, kto):
-        for i in range(len(kto['all_rows'])):
-            self.kto_objects[i].rows = []
-            self.kto_objects[i].rows.extend(kto['all_rows'][i])
-
+    def save_as(self, filename, ktos):
         if not os.path.exists(filename):
             workbook = xlsxwriter.Workbook(filename)
             worksheet = workbook.add_worksheet()
@@ -135,13 +129,10 @@ class converter(object):
                 worksheet.write(0, i, columns[i])
             workbook.close()
 
-        for parsed_kto_ausz in self.kto_objects:
-            print('written')
-            parsed_kto_ausz.to_xlsx(filename)
+        for kto in ktos:
+            self.to_xlsx(filename, kto['all_rows'])
 
     def convert(self, pdf_name, path):
-        self.kto_objects = []
-
         pdf_file = open(path + '/' + pdf_name, 'rb')
         read_pdf = PyPDF2.PdfFileReader(pdf_file)
         number_of_pages = read_pdf.getNumPages()
@@ -156,7 +147,6 @@ class converter(object):
             if len(parsed_kto_ausz.rows) > 0:
                 all_rows.append(parsed_kto_ausz.rows)
                 num_rows.append(len(parsed_kto_ausz.rows))
-                self.kto_objects.append(parsed_kto_ausz)
 
         return {'name': pdf_name, 'all_rows': all_rows, 'num_rows': num_rows}
 
@@ -173,25 +163,42 @@ class gui(object):
                 self.entries = json.load(fp)
         else:
             self.entries = {'open_dir': '/', 'save_file': '/'}
-        self.kto = []
+        self.blacklist = []
+        self.ktos = []
         self.i = 0
+        self.kto_i = 0
 
     def open_file(self, *args):
         filename = self.data['Directory Open']['tkvar'].get()
-        self.kto = cv.convert(filename, self.entries['open_dir'])
+        kto = cv.convert(filename, self.entries['open_dir'])
+        self.blacklist.append(filename)
+        files = [name for name in self.files if name not in self.blacklist]
+        if len(files) == 0:
+            files = ['Bereits alle convertiert'] 
+        self.create_drob_down('Directory Open', funk=self.open_file, label='File', choices=files)
+        if kto is not None:
+            self.ktos.append(kto)
         self.show_sites()
     
     def next_site(self):
-        if len(self.kto) > 0:
-            if self.i == len(self.kto['all_rows']) - 1:
+        if len(self.ktos) > 0:
+            if self.i == len(self.ktos[self.kto_i]['all_rows']) - 1:
+                if self.kto_i == len(self.ktos)-1:
+                    self.kto_i = 0
+                else:
+                    self.kto_i += 1
                 self.i = 0
             else:
                 self.i += 1
             self.show_sites()
 
     def previous_site(self):
-        if len(self.kto) > 0:
-            if self.i == (len(self.kto['all_rows'])-1)*(-1):
+        if len(self.ktos) > 0:
+            if self.i == (len(self.ktos[self.kto_i]['all_rows'])-1)*(-1):
+                if self.kto_i == (len(self.ktos)-1)*(-1):
+                    self.kto_i = 0
+                else:
+                    self.kto_i -= 1
                 self.i = 0
             else:
                 self.i -= 1
@@ -202,12 +209,12 @@ class gui(object):
         for ps in self.table_f.pack_slaves():
             ps.destroy()
 
-        self.name_l = Label(self.table_f, justify=LEFT, text=self.kto['name'])
+        self.name_l = Label(self.table_f, justify=LEFT, text=self.ktos[self.kto_i]['name'])
         self.name_l.pack(side=TOP, fill=BOTH, expand=YES)
-        
+
         for i in range(15):
-            if i < len(self.kto['all_rows'][self.i]):
-                row = self.kto['all_rows'][self.i][i]
+            if i < len(self.ktos[self.kto_i]['all_rows'][self.i]):
+                row = self.ktos[self.kto_i]['all_rows'][self.i][i]
             else:
                 row = ['','','','','']
             f = Frame(self.table_f)
@@ -232,16 +239,16 @@ class gui(object):
                         
             f.pack(side=TOP)
 
-        self.info_l = Label(self.table_f, text='Buchungszeilen {}'.format(self.kto['num_rows'][self.i]))
+        self.info_l = Label(self.table_f, text='Buchungszeilen {}'.format(self.ktos[self.kto_i]['num_rows'][self.i]))
         self.info_l.pack(side=LEFT)
 
        
         if self.i < 0:
-            page_count = len(self.kto['all_rows']) + self.i
+            page_count = len(self.ktos[self.kto_i]['all_rows']) + self.i
         else:
             page_count = self.i
         
-        self.info_l2 = Label(self.table_f, text='Page {}/{}'.format(page_count + 1, len(self.kto['all_rows'])))
+        self.info_l2 = Label(self.table_f, text='Page {}/{}'.format(page_count + 1, len(self.ktos[self.kto_i]['all_rows'])))
         self.info_l2.pack(side=RIGHT)
         
     def fetch(self, *args):
@@ -253,7 +260,7 @@ class gui(object):
                         p = ps.pack_slaves()[j] 
                         if len(p.get()) == 0:
                             p = ps.pack_slaves()[4] 
-                        self.kto['all_rows'][self.i][i][j] = p.get()
+                        self.ktos[self.kto_i]['all_rows'][self.i][i][j] = p.get()
                     i += 1
 
     def dump(self, key, value):
@@ -262,15 +269,14 @@ class gui(object):
             json.dump(self.entries, fp)
         
     def save_file(self):
-        if len(cv.kto_objects) > 0:
+        if len(self.ktos) > 0:
             initdir = self.entries['save_file'].split('/')[:-1]
             initfile = self.entries['save_file'].split('/')[-1]
             filename = filedialog.asksaveasfilename(initialdir=initdir, initialfile=initfile, title = "Select file")
             if len(filename) > 0: 
                 self.dump('save_file', '/'.join(filename.split('/')))
                 self.save_as_l.config(text=filename.split('/')[-1])
-                cv.save_as(self.entries['save_file'], self.kto)
-                print('called')
+                cv.save_as(self.entries['save_file'], self.ktos)
     
     def open_dir(self):
         dir = filedialog.askdirectory(initialdir=self.entries['open_dir'])
@@ -306,8 +312,8 @@ class gui(object):
         if self.entries['open_dir'] == '/':
             files = ['..']
         else:
-            files = [name for name in os.listdir(self.entries['open_dir']) if name.endswith('.PDF')]
-        self.create_drob_down('Directory Open', funk=self.open_file, label='File', choices=files)
+            self.files = [name for name in os.listdir(self.entries['open_dir']) if name.endswith('.PDF')]
+        self.create_drob_down('Directory Open', funk=self.open_file, label='File', choices=self.files)
         
         Label(self.root, bg='grey', width=55).pack(side=TOP, fill=BOTH, expand=YES)
         
