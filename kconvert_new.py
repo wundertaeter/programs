@@ -210,15 +210,16 @@ class gui(object):
 
         self.name_l = Label(self.table_f, justify=LEFT, text=self.ktos[self.kto_i]['name'])
         self.name_l.pack(side=TOP, fill=BOTH, expand=YES)
-
+        
         for i in range(15):
             if i < len(self.ktos[self.kto_i]['all_rows'][self.i]):
                 row = self.ktos[self.kto_i]['all_rows'][self.i][i]
             else:
-                row = ['','','','','']
+                row = ['','','','']
             f = Frame(self.table_f)
+            i = 0
             for value in row:
-                if value == row[-1]:
+                if i == 3:
                     if '-' in value:
                         b = Entry(f, text='')
                         b.insert(END, value)
@@ -231,17 +232,18 @@ class gui(object):
                         b.pack(side=LEFT)
                     else:
                         Entry(f, text='').pack(side=LEFT)
+                        Entry(f, text='').pack(side=LEFT)
                 else:
                     b = Entry(f, text='')
                     b.insert(END, value)
                     b.pack(side=LEFT)
+                i += 1
                         
             f.pack(side=TOP)
 
         self.info_l = Label(self.table_f, text='Buchungszeilen {}'.format(self.ktos[self.kto_i]['num_rows'][self.i]))
         self.info_l.pack(side=LEFT)
 
-       
         if self.i < 0:
             page_count = len(self.ktos[self.kto_i]['all_rows']) + self.i
         else:
@@ -251,17 +253,23 @@ class gui(object):
         self.info_l2.pack(side=RIGHT)
         
     def fetch(self, *args):
-        i = 0
+        row = 0
         for ps in self.table_f.pack_slaves():
             if 'frame' in str(ps):
                 if len(ps.pack_slaves()) == 5:
-                    for j in range(4):
-                        p = ps.pack_slaves()[j] 
-                        if len(p.get()) == 0:
-                            p = ps.pack_slaves()[4] 
-                        self.ktos[self.kto_i]['all_rows'][self.i][i][j] = p.get()
-                    i += 1
-
+                    if row >= len(self.ktos[self.kto_i]['all_rows'][self.i]):
+                        self.ktos[self.kto_i]['all_rows'][self.i].append(['','','',''])
+                    for col in range(4):
+                        p = ps.pack_slaves()[col] 
+                        if len(p.get()) == 0 and col == 3:
+                            p = ps.pack_slaves()[4]
+                        self.ktos[self.kto_i]['all_rows'][self.i][row][col] = p.get()
+                    row += 1
+        
+        while ['','','',''] in self.ktos[self.kto_i]['all_rows'][self.i]:
+            self.ktos[self.kto_i]['all_rows'][self.i].remove(['','','',''])
+                
+                        
     def dump(self, key, value):
         self.entries[key] = value
         with open('entries.json', 'w', encoding='utf-8') as fp:
@@ -309,7 +317,7 @@ class gui(object):
         self.open_b.pack(side=LEFT)
         
         if self.entries['open_dir'] == '/':
-            files = ['..']
+            self.files = ['..']
         else:
             self.files = [name for name in os.listdir(self.entries['open_dir']) if name.endswith('.PDF')]
         self.create_drob_down('Directory Open', funk=self.open_file, label='File', choices=self.files)
