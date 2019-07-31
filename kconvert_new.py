@@ -7,21 +7,6 @@ import xlsxwriter
 import xlrd
 import json
 
-location = os.path.expanduser('~')
-
-# -------------------------------------------------------------------------------
-
-
-def find_all(name):
-    result = []
-    for root, dirs, files in os.walk(location):
-        for dir in dirs:
-            if name.strip().lower() in dir.strip().lower():
-                result.append(os.path.join(root, dir))
-    return result
-# -------------------------------------------------------------------------------
-
-
 class kto_ausz_Parser(object):
     def __init__(self, content, format_in, format_out):
         self.__content = content
