@@ -151,17 +151,17 @@ class gui(object):
             return
         kto = cv.convert(filename, self.entries['open_dir'])
         self.blacklist.append(filename)
-        files = [name for name in self.files if name not in self.blacklist]
-        if len(files) == 0:
-            files = ['Bereits alle Dateien convertiert'] 
-        self.create_drob_down('Directory Open', funk=self.open_file, label='File', choices=files)
+        self.files = [name for name in self.files if name not in self.blacklist]
+        if len(self.files) == 0:
+            self.files = ['Bereits alle Dateien convertiert'] 
+        self.create_drob_down('Directory Open', funk=self.open_file, label='File', choices=self.files)
         if kto is not None:
             if self.kto_count == 0:
                 self.ktos = [kto]
             else:
                 self.ktos.append(kto)
             self.kto_count += 1
-            self.show_sites()
+            self.show()
     
     def next_site(self):
         if len(self.ktos) > 0:
@@ -173,7 +173,7 @@ class gui(object):
                 self.i = 0
             else:
                 self.i += 1
-            self.show_sites()
+            self.show()
 
     def previous_site(self):
         if len(self.ktos) > 0:
@@ -185,9 +185,38 @@ class gui(object):
                 self.i = 0
             else:
                 self.i -= 1
-            self.show_sites()
+            self.show()
 
-    def show_sites(self):
+    def show(self):
+        self.name_l.config(text=self.ktos[self.kto_i]['name'])
+        self.info_l.config(text='Booking Rates {}'.format(self.ktos[self.kto_i]['num_rows'][self.i]))
+        if self.i < 0:
+            page_count = len(self.ktos[self.kto_i]['all_rows']) + self.i
+        else:
+            page_count = self.i
+        self.info_l2.config(text='Page {}/{}'.format(page_count + 1, len(self.ktos[self.kto_i]['all_rows'])))
+        row = 0
+        for ps in self.table_f.pack_slaves():
+            if 'frame' in str(ps):
+                if len(ps.pack_slaves()) == 5:
+                    if row >= len(self.ktos[self.kto_i]['all_rows'][self.i]):
+                        self.ktos[self.kto_i]['all_rows'][self.i].append(['','','',''])
+                    for col in range(4):
+                        p = ps.pack_slaves()[col]
+                        ps.pack_slaves()[4].delete(0, 'end')
+                        p.delete(0, 'end')
+                        if '+' in self.ktos[self.kto_i]['all_rows'][self.i][row][col] and col == 3:
+                            p = ps.pack_slaves()[4]
+                        
+                        p.insert(END, self.ktos[self.kto_i]['all_rows'][self.i][row][col])
+                    row += 1
+        
+        while ['','','',''] in self.ktos[self.kto_i]['all_rows'][self.i]:
+            self.ktos[self.kto_i]['all_rows'][self.i].remove(['','','',''])
+                        
+               
+
+    def build_site(self):
         for ps in self.table_f.pack_slaves():
             ps.destroy()
 
@@ -224,7 +253,7 @@ class gui(object):
                         
             f.pack(side=TOP)
 
-        self.info_l = Label(self.table_f, text='Buchungszeilen {}'.format(self.ktos[self.kto_i]['num_rows'][self.i]))
+        self.info_l = Label(self.table_f, text='Booking Rates {}'.format(self.ktos[self.kto_i]['num_rows'][self.i]))
         self.info_l.pack(side=LEFT)
 
         if self.i < 0:
@@ -272,13 +301,19 @@ class gui(object):
         dir = filedialog.askdirectory(initialdir=self.entries['open_dir'])
         if len(dir) > 0: 
             self.dump('open_dir', dir)
-            files = [name for name in os.listdir(dir) if name.endswith('.PDF')]
-            if len(files) == 0:
-                files = ['Keine PDF Dateien gefunden']
-            self.create_drob_down('Directory Open', funk=self.open_file, label='Files', choices=files)
+            
+            self.files = [name for name in os.listdir(dir) if name.endswith('.PDF')]
+            if len(self.files) == 0:
+                self.files = ['Keine PDF Dateien gefunden']
+            
+            self.files = [name for name in self.files if name not in self.blacklist]
+            if len(self.files) == 0:
+                self.files = ['Bereits alle Dateien convertiert'] 
+            
+            self.create_drob_down('Directory Open', funk=self.open_file, label='Files', choices=self.files)
             self.open_b.config(text=dir.split('/')[-1])
 
-    def create_drob_down(self, name, funk, label='', choices=['..']):
+    def create_drob_down(self, name, funk, choices, label=''):
         for ps in self.data[name]['frame'].pack_slaves():
             if 'option' in str(ps):
                 ps.destroy()
@@ -293,7 +328,7 @@ class gui(object):
 
     def run(self):
         if self.entries['open_dir'] == '/':
-            b_text = 'Ordner wählen'
+            b_text = 'choose Directory'
         else:
             b_text = self.entries['open_dir'].split('/')[-1]
         self.open_b = Button(self.data['Directory Open']['frame'], text=b_text, command=self.open_dir, width=15, borderwidth=1, relief='groove')
@@ -303,7 +338,9 @@ class gui(object):
             self.files = ['..']
         else:
             self.files = [name for name in os.listdir(self.entries['open_dir']) if name.endswith('.PDF')]
-        self.create_drob_down('Directory Open', funk=self.open_file, label='File', choices=self.files)
+        
+        self.create_drob_down('Directory Open', funk=self.open_file, label='Files', choices=self.files)
+        
         
         Label(self.root, bg='grey', width=55).pack(side=TOP, fill=BOTH, expand=YES)
         
@@ -314,12 +351,12 @@ class gui(object):
 
         self.table_f = Frame(self.root)
 
-        self.show_sites()
+        self.build_site()
         self.table_f.pack(side=TOP)
 
         Label(self.root, bg='grey').pack(side=TOP, fill=BOTH, expand=YES)
 
-        self.save_as_l = Label(self.data['Directory Save']['frame'], text='Datei wählen', borderwidth=1, relief='groove')
+        self.save_as_l = Label(self.data['Directory Save']['frame'], text='choose File', borderwidth=1, relief='groove')
         self.save_as_l.pack(side=RIGHT, fill=BOTH, expand=YES)
         self.save_b = Button(self.data['Directory Save']['frame'], command=self.save_file, text='Save As', width=15, borderwidth=1, relief='groove')
         self.save_b.pack(side=LEFT, fill=BOTH)
