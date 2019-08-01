@@ -225,14 +225,8 @@ class gui(object):
         
         for _ in range(15):
             f = Frame(self.table_f)
-            for i in range(4):
-                if i == 3:
-                    Entry(f, text='').pack(side=LEFT)
-                    Entry(f, text='').pack(side=LEFT)
-                else:
-                    b = Entry(f, text='')
-                    b.pack(side=LEFT)
-                        
+            for _ in range(5):
+                Entry(f, text='').pack(side=LEFT)      
             f.pack(side=TOP)
 
         self.info_l = Label(self.table_f, text='Booking Rates 0')
