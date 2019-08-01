@@ -165,6 +165,7 @@ class gui(object):
     
     def next_site(self):
         if len(self.ktos) > 0:
+            self.fetch()
             if self.i == len(self.ktos[self.kto_i]['all_rows']) - 1:
                 if self.kto_i == len(self.ktos)-1:
                     self.kto_i = 0
@@ -177,6 +178,7 @@ class gui(object):
 
     def previous_site(self):
         if len(self.ktos) > 0:
+            self.fetch()
             if self.i == (len(self.ktos[self.kto_i]['all_rows'])-1)*(-1):
                 self.i = 0
             elif self.i == 0:
@@ -205,8 +207,8 @@ class gui(object):
                         self.ktos[self.kto_i]['all_rows'][self.i].append(['','','',''])
                     for col in range(4):
                         p = ps.pack_slaves()[col]
-                        ps.pack_slaves()[4].delete(0, 'end')
-                        p.delete(0, 'end')
+                        ps.pack_slaves()[4].delete(0, END)
+                        p.delete(0, END)
                         if '+' in self.ktos[self.kto_i]['all_rows'][self.i][row][col] and col == 3:
                             p = ps.pack_slaves()[4]
                         
@@ -216,56 +218,31 @@ class gui(object):
         while ['','','',''] in self.ktos[self.kto_i]['all_rows'][self.i]:
             self.ktos[self.kto_i]['all_rows'][self.i].remove(['','','',''])
                         
-               
-
-    def build_site(self):
-        for ps in self.table_f.pack_slaves():
-            ps.destroy()
-
-        self.name_l = Label(self.table_f, justify=LEFT, text=self.ktos[self.kto_i]['name'])
+    def build_table(self):
+        self.table_f = Frame(self.root)
+        self.name_l = Label(self.table_f, justify=LEFT)
         self.name_l.pack(side=TOP, fill=BOTH, expand=YES)
         
-        for i in range(15):
-            if i < len(self.ktos[self.kto_i]['all_rows'][self.i]):
-                row = self.ktos[self.kto_i]['all_rows'][self.i][i]
-            else:
-                row = ['','','','']
+        for _ in range(15):
             f = Frame(self.table_f)
-            i = 0
-            for value in row:
+            for i in range(4):
                 if i == 3:
-                    if '-' in value:
-                        b = Entry(f, text='')
-                        b.insert(END, value)
-                        b.pack(side=LEFT)
-                        Entry(f, text='').pack(side=LEFT)
-                    elif '+' in value:
-                        Entry(f, text='').pack(side=LEFT)
-                        b = Entry(f, text='')
-                        b.insert(END, value)
-                        b.pack(side=LEFT)
-                    else:
-                        Entry(f, text='').pack(side=LEFT)
-                        Entry(f, text='').pack(side=LEFT)
+                    Entry(f, text='').pack(side=LEFT)
+                    Entry(f, text='').pack(side=LEFT)
                 else:
                     b = Entry(f, text='')
-                    b.insert(END, value)
                     b.pack(side=LEFT)
-                i += 1
                         
             f.pack(side=TOP)
 
-        self.info_l = Label(self.table_f, text='Booking Rates {}'.format(self.ktos[self.kto_i]['num_rows'][self.i]))
+        self.info_l = Label(self.table_f, text='Booking Rates 0')
         self.info_l.pack(side=LEFT)
-
-        if self.i < 0:
-            page_count = len(self.ktos[self.kto_i]['all_rows']) + self.i
-        else:
-            page_count = self.i
         
-        self.info_l2 = Label(self.table_f, text='Page {}/{}'.format(page_count + 1, len(self.ktos[self.kto_i]['all_rows'])))
+        self.info_l2 = Label(self.table_f, text='Page 1/1')
         self.info_l2.pack(side=RIGHT)
         
+        self.table_f.pack(side=TOP)
+
     def fetch(self, *args):
         row = 0
         for ps in self.table_f.pack_slaves():
@@ -297,6 +274,7 @@ class gui(object):
             if len(filename) > 0: 
                 self.dump('save_file', '/'.join(filename.split('/')))
                 self.save_as_l.config(text=filename.split('/')[-1])
+                self.fetch()
                 cv.save_as(self.entries['save_file'], self.ktos)
     
     def open_dir(self):
@@ -351,11 +329,8 @@ class gui(object):
         Button(sites, command=self.previous_site, text='previous Site', width=10).pack(side=LEFT)
         sites.pack(side=TOP, fill=BOTH, expand=YES)
 
-        self.table_f = Frame(self.root)
-
-        self.build_site()
-        self.table_f.pack(side=TOP)
-
+        self.build_table()
+        
         Label(self.root, bg='grey').pack(side=TOP, fill=BOTH, expand=YES)
 
         self.save_as_l = Label(self.data['Directory Save']['frame'], text='choose File', borderwidth=1, relief='groove')
@@ -368,7 +343,6 @@ class gui(object):
 
         self.data['Directory Save']['frame'].pack(side=BOTTOM, fill=BOTH, expand=YES)
 
-        self.root.bind('<Return>', self.fetch)
         self.root.mainloop()
 
 if __name__ == '__main__':
