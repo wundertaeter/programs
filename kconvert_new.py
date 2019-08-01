@@ -178,11 +178,13 @@ class gui(object):
     def previous_site(self):
         if len(self.ktos) > 0:
             if self.i == (len(self.ktos[self.kto_i]['all_rows'])-1)*(-1):
+                self.i = 0
+            elif self.i == 0:
                 if self.kto_i == (len(self.ktos)-1)*(-1):
                     self.kto_i = 0
                 else:
                     self.kto_i -= 1
-                self.i = 0
+                self.i -= 1
             else:
                 self.i -= 1
             self.show()
