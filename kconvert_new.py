@@ -154,7 +154,7 @@ class gui(object):
         self.files = [name for name in self.files if name not in self.blacklist]
         if len(self.files) == 0:
             self.files = ['Bereits alle Dateien convertiert'] 
-        self.create_drob_down('Directory Open', funk=self.open_file, label='File', choices=self.files)
+        self.create_drob_down('Directory Open', funk=self.open_file, label='Files', choices=self.files)
         if kto is not None:
             if self.kto_count == 0:
                 self.ktos = [kto]
@@ -264,7 +264,7 @@ class gui(object):
         if len(self.ktos) > 0:
             initdir = self.entries['save_file'].split('/')[:-1]
             initfile = self.entries['save_file'].split('/')[-1]
-            filename = filedialog.asksaveasfilename(initialdir=initdir, initialfile=initfile, title = "Select file")
+            filename = filedialog.asksaveasfilename(initialdir=initdir, initialfile=initfile, title = "Select file", defaultextension='.xlsx')
             if len(filename) > 0: 
                 self.dump('save_file', '/'.join(filename.split('/')))
                 self.save_as_l.config(text=filename.split('/')[-1])
