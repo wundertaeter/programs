@@ -132,6 +132,7 @@ cv = converter()
 class gui(object):
     def __init__(self):
         self.root = Tk()
+        self.root.title('Kontoauszug Converter')
         self.data = {'Directory Open': {'frame': Frame(self.root)},
                      'Directory Save': {'frame': Frame(self.root)}}
         if os.path.exists('entries.json'):
