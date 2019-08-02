@@ -366,6 +366,7 @@ class gui(object):
         self.root.bind('<Left>', self.previous_site)
         self.root.bind('<Right>', self.next_site)
         self.root.bind('<Button-3>', self.remove_cursor)
+        self.root.bind('<Return>', self.remove_cursor)
         
         self.root.mainloop()
 
