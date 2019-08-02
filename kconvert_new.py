@@ -50,7 +50,6 @@ class kto_ausz_Parser(object):
             if '+' in self.__content[i] or '-' in self.__content[i]:
                 amount = self.__content[:i+1].strip()
                 self.__content = self.__content[i+1:]
-                
                 if '-' in amount:
                     return (amount, '')
                 elif '+' in amount:
