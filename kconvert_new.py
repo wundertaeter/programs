@@ -142,6 +142,9 @@ class gui(object):
             self.entries = {'open_dir': '/', 'save_file': '/'}
         self.blacklist = []
         self.empty_page = [{'all_rows':[[['','','','']]], 'name': '', 'num_rows': [0]}]
+        self.init()
+
+    def init(self):
         self.ktos = self.empty_page
         self.kto_count = 0
         self.i = 0
@@ -272,10 +275,7 @@ class gui(object):
                 self.save_as_l.config(text=filename.split('/')[-1])
                 self.fetch()
                 cv.save_as(self.entries['save_file'], self.ktos)
-                self.ktos = self.empty_page
-                self.kto_count = 0
-                self.i = 0
-                self.kto_i = 0
+                self.init()
                 self.show()
     
     def open_dir(self):
