@@ -331,6 +331,7 @@ class gui(object):
         pack_slaves = frame.pack_slaves()
         ent = pack_slaves[pack_slaves.index(entry)]
 
+        self.fetch()
         ent.destroy()
         Entry(frame, text='').pack(side=LEFT)
 
