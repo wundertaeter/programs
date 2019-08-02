@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import filedialog
+from tkinter import ttk
 import PyPDF2
 from datetime import datetime
 import os
@@ -168,35 +169,38 @@ class gui(object):
             self.kto_count += 1
             self.show()
     
-    def next_site(self):
+    def next_site(self, event):
         if len(self.ktos) > 0:
-            self.fetch()
-            if self.i == len(self.ktos[self.kto_i]['all_rows']) - 1:
-                if self.kto_i == len(self.ktos)-1:
-                    self.kto_i = 0
+            if str(self.root.focus_get()) == '.':
+                self.fetch()
+                if self.i == len(self.ktos[self.kto_i]['all_rows']) - 1:
+                    if self.kto_i == len(self.ktos)-1:
+                        self.kto_i = 0
+                    else:
+                        self.kto_i += 1
+                    self.i = 0
                 else:
-                    self.kto_i += 1
-                self.i = 0
-            else:
-                self.i += 1
-            self.show()
+                    self.i += 1
+                self.show()
 
-    def previous_site(self):
+    def previous_site(self, event):
         if len(self.ktos) > 0:
-            self.fetch()
-            if self.i == (len(self.ktos[self.kto_i]['all_rows'])-1)*(-1):
-                self.i = 0
-            elif self.i == 0:
-                if self.kto_i == (len(self.ktos)-1)*(-1):
-                    self.kto_i = 0
+            if str(self.root.focus_get()) == '.':
+                self.fetch()
+                if self.i == (len(self.ktos[self.kto_i]['all_rows'])-1)*(-1):
+                    self.i = 0
+                elif self.i == 0:
+                    if self.kto_i == (len(self.ktos)-1)*(-1):
+                        self.kto_i = 0
+                    else:
+                        self.kto_i -= 1
+                    self.i -= 1
                 else:
-                    self.kto_i -= 1
-                self.i -= 1
-            else:
-                self.i -= 1
-            self.show()
+                    self.i -= 1
+                self.show()
 
     def show(self):
+        self.kto_count_l.config(text='Statement {}/{}'.format(self.kto_i+1, self.kto_count))
         self.name_l.config(text=self.ktos[self.kto_i]['name'])
         self.info_l.config(text='Booking Rates {}'.format(self.ktos[self.kto_i]['num_rows'][self.i]))
         if self.i < 0:
@@ -224,9 +228,15 @@ class gui(object):
             self.ktos[self.kto_i]['all_rows'][self.i].remove(['','','',''])
                         
     def build_table(self):
-        self.table_f = Frame(self.root)
-        self.name_l = Label(self.table_f, justify=LEFT)
-        self.name_l.pack(side=TOP, fill=BOTH, expand=YES)
+        self.table_f.configure(background='grey')
+        table_lable_f = Frame(self.table_f)
+        table_lable_f.configure(background='grey')
+        self.name_l = Label(table_lable_f, justify=LEFT, bg='grey')
+        self.name_l.pack(side=LEFT)
+
+        self.kto_count_l = Label(table_lable_f, text='Statement 0/0', bg='grey')
+        self.kto_count_l.pack(side=RIGHT)
+        table_lable_f.pack(side=TOP, fill=BOTH, expand=YES)
         
         for _ in range(15):
             f = Frame(self.table_f)
@@ -234,13 +244,13 @@ class gui(object):
                 Entry(f, text='').pack(side=LEFT)      
             f.pack(side=TOP)
 
-        self.info_l = Label(self.table_f, text='Booking Rates 0')
+        self.info_l = Label(self.table_f, text='Booking Rates 0', bg='grey')
         self.info_l.pack(side=LEFT)
         
-        self.info_l2 = Label(self.table_f, text='Page 1/1')
+        self.info_l2 = Label(self.table_f, text='Page 0/0', bg='grey')
         self.info_l2.pack(side=RIGHT)
         
-        self.table_f.pack(side=TOP)
+        
 
     def fetch(self, *args):
         row = 0
@@ -307,6 +317,16 @@ class gui(object):
         self.data[name]['tkvar'].trace('w', funk)
         self.data[name]['frame'].pack(side=TOP, fill=BOTH, expand=YES)
 
+    def remove_cursor(self, event):
+        if str(self.root.focus_get()) != '.':
+            for frame in self.table_f.pack_slaves():
+                if 'frame' in str(frame):
+                    for ent in frame.pack_slaves():
+                        if ent == self.root.focus_get():
+                            ent.destroy()
+                            Entry(frame, text='').pack(side=LEFT)              
+            self.show()
+
     def run(self):
         if self.entries['open_dir'] == '/':
             b_text = 'choose Directory'
@@ -323,16 +343,19 @@ class gui(object):
         self.create_drob_down('Directory Open', funk=self.open_file, label='Files', choices=self.files)
         
         
-        Label(self.root, bg='grey', width=55).pack(side=TOP, fill=BOTH, expand=YES)
+        #Label(self.root, bg='grey', width=55).pack(side=TOP, fill=BOTH, expand=YES)
         
         sites = Frame(self.root)
-        Button(sites, command=self.next_site, text='next Site', width=10).pack(side=RIGHT)
-        Button(sites, command=self.previous_site, text='previous Site', width=10).pack(side=LEFT)
-        sites.pack(side=TOP, fill=BOTH, expand=YES)
+        sites.configure(background='grey')
+        Button(sites, command=self.next_site, text='next Site', width=10, bg='grey').pack(side=RIGHT)
+        Button(sites, command=self.previous_site, text='previous Site', width=10, bg='grey').pack(side=LEFT)
+        #sites.pack(side=TOP, fill=BOTH, expand=YES)
 
+        self.table_f = Frame(self.root)
         self.build_table()
+        self.table_f.pack(side=TOP)
         
-        Label(self.root, bg='grey').pack(side=TOP, fill=BOTH, expand=YES)
+        #Label(self.root, bg='grey').pack(side=TOP, fill=BOTH, expand=YES)
 
         self.save_as_l = Label(self.data['Directory Save']['frame'], text='choose File', borderwidth=1, relief='groove')
         self.save_as_l.pack(side=RIGHT, fill=BOTH, expand=YES)
@@ -343,7 +366,10 @@ class gui(object):
             self.save_as_l.config(text=self.entries['save_file'].split('/')[-1])
 
         self.data['Directory Save']['frame'].pack(side=BOTTOM, fill=BOTH, expand=YES)
-
+        self.root.bind('<Right>', self.previous_site)
+        self.root.bind('<Left>', self.next_site)
+        self.root.bind('<Button-3>', self.remove_cursor)
+        
         self.root.mainloop()
 
 if __name__ == '__main__':
