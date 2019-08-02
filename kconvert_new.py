@@ -323,14 +323,19 @@ class gui(object):
         self.data['frame'].pack(side=TOP, fill=BOTH, expand=YES)
 
     def remove_cursor(self, event):
-        if str(self.root.focus_get()) != '.':
-            for frame in self.table_f.pack_slaves():
-                if 'frame' in str(frame):
-                    for ent in frame.pack_slaves():
-                        if ent == self.root.focus_get():
-                            ent.destroy()
-                            Entry(frame, text='').pack(side=LEFT)              
-            self.show()
+        entry = self.root.focus_get()
+        parent = entry._nametowidget(entry.winfo_parent())
+
+        pack_slaves = self.table_f.pack_slaves()
+        frame = pack_slaves[pack_slaves.index(parent)]
+
+        pack_slaves = frame.pack_slaves()
+        ent = pack_slaves[pack_slaves.index(entry)]
+
+        ent.destroy()
+        Entry(frame, text='').pack(side=LEFT)
+
+        self.show()
 
     def run(self):
         if self.entries['open_dir'] == '/':
