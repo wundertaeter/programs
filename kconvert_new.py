@@ -134,8 +134,7 @@ class gui(object):
     def __init__(self):
         self.root = Tk()
         self.root.title('Kontoauszug Converter')
-        self.data = {'Directory Open': {'frame': Frame(self.root)},
-                     'Directory Save': {'frame': Frame(self.root)}}
+        self.data = {'frame': Frame(self.root)}
         if os.path.exists('entries.json'):
             with open('entries.json', 'r', encoding='utf-8') as fp:
                 self.entries = json.load(fp)
@@ -152,7 +151,7 @@ class gui(object):
         self.kto_i = 0
 
     def open_file(self, *args):
-        filename = self.data['Directory Open']['tkvar'].get()
+        filename = self.data['tkvar'].get()
         if filename == 'Bereits alle Dateien konvertiert':
             return
         kto = cv.convert(filename, self.entries['open_dir'])
@@ -200,9 +199,14 @@ class gui(object):
                 self.show()
 
     def show(self):
-        self.kto_count_l.config(text='Statement {}/{}'.format(self.kto_i+1, self.kto_count))
+        if self.kto_i < 0:
+            kto_i = self.kto_count + self.kto_i
+        else:
+            kto_i = self.kto_i
+        self.kto_count_l.config(text='Statement {}/{}'.format(kto_i+1, self.kto_count))
         self.name_l.config(text=self.ktos[self.kto_i]['name'])
         self.info_l.config(text='Booking Rates {}'.format(self.ktos[self.kto_i]['num_rows'][self.i]))
+        
         if self.i < 0:
             page_count = len(self.ktos[self.kto_i]['all_rows']) + self.i
         else:
@@ -228,13 +232,14 @@ class gui(object):
             self.ktos[self.kto_i]['all_rows'][self.i].remove(['','','',''])
                         
     def build_table(self):
+        self.table_f = Frame(self.root)
         self.table_f.configure(background='grey')
         table_lable_f = Frame(self.table_f)
         table_lable_f.configure(background='grey')
-        self.name_l = Label(table_lable_f, justify=LEFT, bg='grey')
+        self.name_l = Label(table_lable_f, justify=LEFT, bg='grey', fg="white")
         self.name_l.pack(side=LEFT)
 
-        self.kto_count_l = Label(table_lable_f, text='Statement 0/0', bg='grey')
+        self.kto_count_l = Label(table_lable_f, text='Statement 0/0', bg='grey', fg="white")
         self.kto_count_l.pack(side=RIGHT)
         table_lable_f.pack(side=TOP, fill=BOTH, expand=YES)
         
@@ -244,12 +249,12 @@ class gui(object):
                 Entry(f, text='').pack(side=LEFT)      
             f.pack(side=TOP)
 
-        self.info_l = Label(self.table_f, text='Booking Rates 0', bg='grey')
+        self.info_l = Label(self.table_f, text='Booking Rates 0', bg='grey', fg="white")
         self.info_l.pack(side=LEFT)
         
-        self.info_l2 = Label(self.table_f, text='Page 0/0', bg='grey')
+        self.info_l2 = Label(self.table_f, text='Page 0/0', bg='grey', fg="white")
         self.info_l2.pack(side=RIGHT)
-        
+        self.table_f.pack(side=TOP)
         
 
     def fetch(self, *args):
@@ -305,17 +310,17 @@ class gui(object):
             self.open_b.config(text=dir.split('/')[-1])
 
     def create_drob_down(self, name, funk, choices, label=''):
-        for ps in self.data[name]['frame'].pack_slaves():
+        for ps in self.data['frame'].pack_slaves():
             if 'option' in str(ps):
                 ps.destroy()
-        self.data[name]['tkvar'] = StringVar(self.data[name]['frame'])
-        self.data[name]['tkvar'].set(label)
+        self.data['tkvar'] = StringVar(self.data['frame'])
+        self.data['tkvar'].set(label)
 
-        popupMenu = OptionMenu(self.data[name]['frame'], self.data[name]['tkvar'], *choices)
+        popupMenu = OptionMenu(self.data['frame'], self.data['tkvar'], *choices)
         popupMenu.pack(side=RIGHT, fill=BOTH, expand=YES)
 
-        self.data[name]['tkvar'].trace('w', funk)
-        self.data[name]['frame'].pack(side=TOP, fill=BOTH, expand=YES)
+        self.data['tkvar'].trace('w', funk)
+        self.data['frame'].pack(side=TOP, fill=BOTH, expand=YES)
 
     def remove_cursor(self, event):
         if str(self.root.focus_get()) != '.':
@@ -332,7 +337,7 @@ class gui(object):
             b_text = 'choose Directory'
         else:
             b_text = self.entries['open_dir'].split('/')[-1]
-        self.open_b = Button(self.data['Directory Open']['frame'], text=b_text, command=self.open_dir, width=15, borderwidth=1, relief='groove')
+        self.open_b = Button(self.data['frame'], text=b_text, command=self.open_dir, width=15, borderwidth=1, relief='groove')
         self.open_b.pack(side=LEFT)
         
         if self.entries['open_dir'] == '/':
@@ -342,32 +347,20 @@ class gui(object):
         
         self.create_drob_down('Directory Open', funk=self.open_file, label='Files', choices=self.files)
         
-        
-        #Label(self.root, bg='grey', width=55).pack(side=TOP, fill=BOTH, expand=YES)
-        
-        sites = Frame(self.root)
-        sites.configure(background='grey')
-        Button(sites, command=self.next_site, text='next Site', width=10, bg='grey').pack(side=RIGHT)
-        Button(sites, command=self.previous_site, text='previous Site', width=10, bg='grey').pack(side=LEFT)
-        #sites.pack(side=TOP, fill=BOTH, expand=YES)
-
-        self.table_f = Frame(self.root)
         self.build_table()
-        self.table_f.pack(side=TOP)
         
-        #Label(self.root, bg='grey').pack(side=TOP, fill=BOTH, expand=YES)
-
-        self.save_as_l = Label(self.data['Directory Save']['frame'], text='choose File', borderwidth=1, relief='groove')
+        save_frame = Frame(self.root)
+        self.save_as_l = Label(save_frame, text='choose File', borderwidth=1, relief='groove')
         self.save_as_l.pack(side=RIGHT, fill=BOTH, expand=YES)
-        self.save_b = Button(self.data['Directory Save']['frame'], command=self.save_file, text='Save As', width=15, borderwidth=1, relief='groove')
+        self.save_b = Button(save_frame, command=self.save_file, text='Save As', width=15, borderwidth=1, relief='groove')
         self.save_b.pack(side=LEFT, fill=BOTH)
         
         if self.entries['save_file'] != '/':
             self.save_as_l.config(text=self.entries['save_file'].split('/')[-1])
 
-        self.data['Directory Save']['frame'].pack(side=BOTTOM, fill=BOTH, expand=YES)
-        self.root.bind('<Right>', self.previous_site)
-        self.root.bind('<Left>', self.next_site)
+        save_frame.pack(side=BOTTOM, fill=BOTH, expand=YES)
+        self.root.bind('<Left>', self.previous_site)
+        self.root.bind('<Right>', self.next_site)
         self.root.bind('<Button-3>', self.remove_cursor)
         
         self.root.mainloop()
