@@ -27,7 +27,6 @@ class kto_ausz_Parser(object):
                 found = True
             except:
                 pass
-
             if found:
                 self.__content = self.__content[i+20:].strip()
                 return (datetime.strftime(date1, format_out),
