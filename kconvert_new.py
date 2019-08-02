@@ -12,7 +12,7 @@ class kto_ausz_Parser(object):
         self.__content = content
         self.rows = []
         self.num_rows = self.__get_num_rows()
-        for i in range(self.num_rows):
+        for _ in range(self.num_rows):
             row = self.__parse_date(format_in, format_out)
             row += self.__parse_description()
             row += self.__parse_amount()
@@ -50,7 +50,11 @@ class kto_ausz_Parser(object):
             if '+' in self.__content[i] or '-' in self.__content[i]:
                 amount = self.__content[:i+1].strip()
                 self.__content = self.__content[i+1:]
-                return (amount,)
+                
+                if '-' in amount:
+                    return (amount, '')
+                elif '+' in amount:
+                    return ('' , amount)
 
     def __get_num_rows(self):
         count = 0
@@ -82,13 +86,7 @@ class converter(object):
         for rows in all_rows:
             for row in rows:
                 for value in row:
-                    if value == row[-1]:
-                        if '-' in value:
-                            newSheet.write(row_num, col, value+'\t\n')
-                        elif '+' in value:
-                            newSheet.write(row_num, col+1,'\t'+value+'\n')
-                    else:
-                        newSheet.write(row_num, col, value+'\t')
+                    newSheet.write(row_num, col, value)
                     col += 1
                 row_num += 1
                 col = 0
@@ -140,7 +138,7 @@ class gui(object):
         else:
             self.entries = {'open_dir': '/', 'save_file': '/'}
         self.blacklist = []
-        self.empty_page = [{'all_rows':[[['','','','']]], 'name': '', 'num_rows': [0]}]
+        self.empty_page = [{'all_rows':[[['','','','','']]], 'name': '', 'num_rows': [0]}]
         self.init()
 
     def init(self):
@@ -216,19 +214,15 @@ class gui(object):
             if 'frame' in str(ps):
                 if len(ps.pack_slaves()) == 5:
                     if row >= len(self.ktos[self.kto_i]['all_rows'][self.i]):
-                        self.ktos[self.kto_i]['all_rows'][self.i].append(['','','',''])
-                    for col in range(4):
+                        self.ktos[self.kto_i]['all_rows'][self.i].append(['','','','',''])
+                    for col in range(5):
                         p = ps.pack_slaves()[col]
-                        ps.pack_slaves()[4].delete(0, END)
                         p.delete(0, END)
-                        if '+' in self.ktos[self.kto_i]['all_rows'][self.i][row][col] and col == 3:
-                            p = ps.pack_slaves()[4]
-                        
                         p.insert(END, self.ktos[self.kto_i]['all_rows'][self.i][row][col])
                     row += 1
         
-        while ['','','',''] in self.ktos[self.kto_i]['all_rows'][self.i]:
-            self.ktos[self.kto_i]['all_rows'][self.i].remove(['','','',''])
+        while ['','','','',''] in self.ktos[self.kto_i]['all_rows'][self.i]:
+            self.ktos[self.kto_i]['all_rows'][self.i].remove(['','','','',''])
                         
     def build_table(self):
         self.table_f = Frame(self.root)
@@ -262,16 +256,14 @@ class gui(object):
             if 'frame' in str(ps):
                 if len(ps.pack_slaves()) == 5:
                     if row >= len(self.ktos[self.kto_i]['all_rows'][self.i]):
-                        self.ktos[self.kto_i]['all_rows'][self.i].append(['','','',''])
-                    for col in range(4):
-                        p = ps.pack_slaves()[col] 
-                        if len(p.get()) == 0 and col == 3:
-                            p = ps.pack_slaves()[4]
+                        self.ktos[self.kto_i]['all_rows'][self.i].append(['','','','',''])
+                    for col in range(5):
+                        p = ps.pack_slaves()[col]
                         self.ktos[self.kto_i]['all_rows'][self.i][row][col] = p.get()
                     row += 1
         
-        while ['','','',''] in self.ktos[self.kto_i]['all_rows'][self.i]:
-            self.ktos[self.kto_i]['all_rows'][self.i].remove(['','','',''])
+        while ['','','','',''] in self.ktos[self.kto_i]['all_rows'][self.i]:
+            self.ktos[self.kto_i]['all_rows'][self.i].remove(['','','','',''])
                 
                         
     def dump(self, key, value):
