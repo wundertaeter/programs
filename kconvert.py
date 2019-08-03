@@ -27,6 +27,7 @@ class kto_ausz_Parser(object):
                 found = True
             except:
                 pass
+
             if found:
                 self.__content = self.__content[i+20:].strip()
                 return (datetime.strftime(date1, format_out),
@@ -49,6 +50,7 @@ class kto_ausz_Parser(object):
             if '+' in self.__content[i] or '-' in self.__content[i]:
                 amount = self.__content[:i+1].strip()
                 self.__content = self.__content[i+1:]
+                
                 if '-' in amount:
                     return (amount, '')
                 elif '+' in amount:
@@ -195,10 +197,12 @@ class gui(object):
 
     def show(self):
         if self.kto_i < 0:
-            kto_i = self.kto_count + self.kto_i
+            kto_i = self.kto_count + self.kto_i +1
+        elif self.kto_count == 0:
+            kto_i = 0
         else:
-            kto_i = self.kto_i
-        self.kto_count_l.config(text='Statement {}/{}'.format(kto_i+1, self.kto_count))
+            kto_i = self.kto_i +1
+        self.kto_count_l.config(text='Statement {}/{}'.format(kto_i, self.kto_count))
         self.name_l.config(text=self.ktos[self.kto_i]['name'])
         self.info_l.config(text='Booking Rates {}'.format(self.ktos[self.kto_i]['num_rows'][self.i]))
         
