@@ -152,9 +152,9 @@ class gui(object):
         else:
             self.entries = {'open_dir': '/', 'save_file': '/'}
         self.blacklist = []
-        self.init()
+        self.init_0()
 
-    def init(self):
+    def init_0(self):
         self.ktos = [{'all_rows':[[['','','','','']]], 'name': '', 'num_rows': [0]}]
         self.kto_count = 0
         self.i = 0
@@ -296,7 +296,7 @@ class gui(object):
                 self.save_as_l.config(text=filename.split('/')[-1])
                 self.fetch()
                 cv.save_as(self.entries['save_file'], self.ktos)
-                self.init()
+                self.init_0()
                 self.show()
     
     def open_dir(self):
