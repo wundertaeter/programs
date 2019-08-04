@@ -50,22 +50,34 @@ class kto_ausz_Parser(object):
             if '+' in self.__content[i] or '-' in self.__content[i]:
                 amount = self.__content[:i+1].strip()
                 self.__content = self.__content[i+1:]
-
-                if '-' in amount:
-                    return (amount, '')
-                elif '+' in amount:
-                    return ('' , amount)
+                return (amount,)
 
     def __get_num_rows(self):
         count = 0
         for i in range(len(self.__content) - 10):
             try:
-                date1 = datetime.strptime(self.__content[i:i+10], '%d.%m.%Y').date()
-                date2 = datetime.strptime(self.__content[i+10:i+20], '%d.%m.%Y').date()
+                datetime.strptime(self.__content[i:i+10], '%d.%m.%Y')
+                datetime.strptime(self.__content[i+10:i+20], '%d.%m.%Y')
                 count += 1
             except:
                 pass
         return count
+    
+    def get_rows_table_format(self):
+        format_rows = []
+        for row in self.rows: 
+            format_row = []
+            for i in range(len(row)):
+                value = row[i]
+                if i == 3:
+                    if '-' in value:
+                        format_row.extend([value, ''])
+                    elif '+' in value:
+                        format_row.extend(['' , value])
+                else:
+                    format_row.append(value)
+            format_rows.append(format_row)
+        return format_rows
     
 class converter(object):
     def to_xlsx(self, filename, all_rows):
@@ -119,7 +131,7 @@ class converter(object):
             parsed_kto_ausz = kto_ausz_Parser(page_content, '%d.%m.%Y', '%d.%m.%Y')
 
             if len(parsed_kto_ausz.rows) > 0:
-                all_rows.append(parsed_kto_ausz.rows)
+                all_rows.append(parsed_kto_ausz.get_rows_table_format())
                 num_rows.append(len(parsed_kto_ausz.rows))
 
         return {'name': pdf_name, 'all_rows': all_rows, 'num_rows': num_rows}
