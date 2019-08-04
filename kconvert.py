@@ -78,7 +78,9 @@ class kto_ausz_Parser(object):
                     format_row.append(value)
             format_rows.append(format_row)
         return format_rows
-    
+
+# --------------------------------------------------------------------
+
 class converter(object):
     def to_xlsx(self, filename, all_rows):
         wbRD = xlrd.open_workbook(filename)
@@ -136,8 +138,8 @@ class converter(object):
 
         return {'name': pdf_name, 'all_rows': all_rows, 'num_rows': num_rows}
 
-cv = converter()
 # --------------------------------------------------------------------
+cv = converter()
 
 class gui(object):
     def __init__(self):
