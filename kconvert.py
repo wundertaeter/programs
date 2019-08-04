@@ -50,7 +50,7 @@ class kto_ausz_Parser(object):
             if '+' in self.__content[i] or '-' in self.__content[i]:
                 amount = self.__content[:i+1].strip()
                 self.__content = self.__content[i+1:]
-                
+
                 if '-' in amount:
                     return (amount, '')
                 elif '+' in amount:
@@ -138,11 +138,10 @@ class gui(object):
         else:
             self.entries = {'open_dir': '/', 'save_file': '/'}
         self.blacklist = []
-        self.empty_page = [{'all_rows':[[['','','','','']]], 'name': '', 'num_rows': [0]}]
         self.init()
 
     def init(self):
-        self.ktos = self.empty_page
+        self.ktos = [{'all_rows':[[['','','','','']]], 'name': '', 'num_rows': [0]}]
         self.kto_count = 0
         self.i = 0
         self.kto_i = 0
