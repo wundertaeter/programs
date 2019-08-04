@@ -238,6 +238,8 @@ class gui(object):
         
         while ['','','','',''] in self.ktos[self.kto_i]['all_rows'][self.i]:
             self.ktos[self.kto_i]['all_rows'][self.i].remove(['','','','',''])
+        
+        self.remove_cursor()
                         
     def build_table(self):
         self.table_f = Frame(self.root)
@@ -328,21 +330,23 @@ class gui(object):
         self.data['tkvar'].trace('w', funk)
         self.data['frame'].pack(side=TOP, fill=BOTH, expand=YES)
 
-    def remove_cursor(self, event):
+    def remove_cursor(self, event=None):
         entry = self.root.focus_get()
-        parent = entry._nametowidget(entry.winfo_parent())
+        p_name = entry.winfo_parent()
+        if p_name != '':
+            parent = entry._nametowidget(p_name)
 
-        pack_slaves = self.table_f.pack_slaves()
-        frame = pack_slaves[pack_slaves.index(parent)]
+            pack_slaves = self.table_f.pack_slaves()
+            frame = pack_slaves[pack_slaves.index(parent)]
 
-        pack_slaves = frame.pack_slaves()
-        ent = pack_slaves[pack_slaves.index(entry)]
+            pack_slaves = frame.pack_slaves()
+            ent = pack_slaves[pack_slaves.index(entry)]
 
-        self.fetch()
-        ent.destroy()
-        Entry(frame, text='').pack(side=LEFT)
+            self.fetch()
+            ent.destroy()
+            Entry(frame, text='').pack(side=LEFT)
 
-        self.show()
+            self.show()
 
     def run(self):
         if self.entries['open_dir'] == '/':
