@@ -164,6 +164,8 @@ class gui(object):
     def open_file(self, filename):
         if filename == '..':
             return
+        elif filename == 'Keine PDF Dateien gefunden':
+            return
             
         kto = cv.convert(filename, self.entries['open_dir'])
         
@@ -345,9 +347,12 @@ class gui(object):
         self.menbutton["menu"]  =  self.menbutton.menu
         
         for label in choices:
-            if label not in self.data['tkvars']:
-                self.data['tkvars'][label] = BooleanVar(self.data['frame'])
-            self.menbutton.menu.add_checkbutton(label=label, command=self.fetch_drop_down, variable=self.data['tkvars'][label], foreground='blue')
+            if label == 'Keine PDF Dateien gefunden' or label == '..':
+                self.menbutton.menu.add_command(label=label)
+            else:
+                if label not in self.data['tkvars']:
+                    self.data['tkvars'][label] = BooleanVar(self.data['frame'])        
+                self.menbutton.menu.add_checkbutton(label=label, command=self.fetch_drop_down, variable=self.data['tkvars'][label], foreground='blue')
             self.menbutton.pack(side=RIGHT, fill=BOTH, expand=YES)
         
         self.data['frame'].pack(side=TOP, fill=BOTH, expand=YES)
@@ -383,7 +388,9 @@ class gui(object):
             self.files = ['..']
         else:
             self.files = [name for name in os.listdir(self.entries['open_dir']) if name.endswith('.PDF')]
-        
+            if len(self.files) == 0:
+                self.files = ['Keine PDF Dateien gefunden']
+       
         self.create_drob_down(funk=self.open_file, label='Files', choices=self.files)
         
         self.build_table()
