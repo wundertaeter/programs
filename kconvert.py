@@ -162,11 +162,6 @@ class gui(object):
         self.checkt = []
 
     def open_file(self, filename):
-        if filename == '..':
-            return
-        elif filename == 'Keine PDF Dateien gefunden':
-            return
-            
         kto = cv.convert(filename, self.entries['open_dir'])
         
         if kto is not None:
