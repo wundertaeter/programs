@@ -144,6 +144,7 @@ cv = converter()
 class gui(object):
     def __init__(self):
         self.root = Tk()
+        self.root.resizable(0, 0)
         self.root.title('Kontoauszug Converter')
         self.data = {'frame': Frame(self.root), 'tkvars': {}}
         if os.path.exists('entries.json'):
