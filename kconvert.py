@@ -315,30 +315,26 @@ class gui(object):
             self.open_b.config(text=dir.split('/')[-1])
 
     def fetch_drop_down(self):
-        for var in self.data['tkvars'].values():
-            label = var.get()
-            if len(label) > 0:
-                if bool(int(label[-1])):
-                    filename = label[:-1]
-                    if filename not in self.checkt:
-                        self.checkt.append(filename)
-                        self.open_file(filename)
-                else:
-                    filename = label[:-1]
-                    if filename in self.checkt:
-                        self.checkt.remove(filename)
-                        for kto in self.ktos:
-                            if filename in kto.values():
-                                self.ktos.remove(kto)
-                                if len(self.ktos) == 0:
-                                    self.init_0()
-                                elif self.kto_i == len(self.ktos):
-                                    self.i = 0
-                                    self.kto_i -= 1
-                                    self.kto_count -= 1
-                                else:
-                                    self.kto_count -= 1
-                                self.show()
+        for name, var in self.data['tkvars'].items():
+            if var.get():
+                if name not in self.checkt:
+                    self.checkt.append(name)
+                    self.open_file(name)
+            else:
+                if name in self.checkt:
+                    self.checkt.remove(name)
+                    for kto in self.ktos:
+                        if name in kto.values():
+                            self.ktos.remove(kto)
+                            if len(self.ktos) == 0:
+                                self.init_0()
+                            elif self.kto_i == len(self.ktos):
+                                self.i = 0
+                                self.kto_i -= 1
+                                self.kto_count -= 1
+                            else:
+                                self.kto_count -= 1
+                            self.show()
 
     def create_drob_down(self, funk, choices, label=''):
         for ps in self.data['frame'].pack_slaves():
@@ -350,8 +346,8 @@ class gui(object):
         
         for label in choices:
             if label not in self.data['tkvars']:
-                self.data['tkvars'][label] = StringVar(self.data['frame'])
-            self.menbutton.menu.add_checkbutton(label=label, onvalue=label+'1', offvalue=label+'0', command=self.fetch_drop_down, variable=self.data['tkvars'][label], foreground='blue')
+                self.data['tkvars'][label] = BooleanVar(self.data['frame'])
+            self.menbutton.menu.add_checkbutton(label=label, command=self.fetch_drop_down, variable=self.data['tkvars'][label], foreground='blue')
             self.menbutton.pack(side=RIGHT, fill=BOTH, expand=YES)
         
         self.data['frame'].pack(side=TOP, fill=BOTH, expand=YES)
