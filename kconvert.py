@@ -145,13 +145,12 @@ class gui(object):
     def __init__(self):
         self.root = Tk()
         self.root.title('Kontoauszug Converter')
-        self.data = {'frame': Frame(self.root)}
+        self.data = {'frame': Frame(self.root), 'tkvars': {}}
         if os.path.exists('entries.json'):
             with open('entries.json', 'r', encoding='utf-8') as fp:
                 self.entries = json.load(fp)
         else:
             self.entries = {'open_dir': '/', 'save_file': '/'}
-        self.blacklist = []
         self.init_0()
 
     def init_0(self):
@@ -159,17 +158,14 @@ class gui(object):
         self.kto_count = 0
         self.i = 0
         self.kto_i = 0
+        self.checkt = []
 
-    def open_file(self, *args):
-        filename = self.data['tkvar'].get()
-        if filename == 'Bereits alle Dateien konvertiert':
+    def open_file(self, filename):
+        if filename == '..':
             return
+            
         kto = cv.convert(filename, self.entries['open_dir'])
-        self.blacklist.append(filename)
-        self.files = [name for name in self.files if name not in self.blacklist]
-        if len(self.files) == 0:
-            self.files = ['Bereits alle Dateien konvertiert'] 
-        self.create_drob_down('Directory Open', funk=self.open_file, label='Files', choices=self.files)
+        
         if kto is not None:
             if self.kto_count == 0:
                 self.ktos = [kto]
@@ -281,6 +277,9 @@ class gui(object):
         
         while ['','','','',''] in self.ktos[self.kto_i]['all_rows'][self.i]:
             self.ktos[self.kto_i]['all_rows'][self.i].remove(['','','','',''])
+        
+        self.ktos[self.kto_i]['num_rows'][self.i] = len(self.ktos[self.kto_i]['all_rows'][self.i])
+
                 
                         
     def dump(self, key, value):
@@ -307,46 +306,73 @@ class gui(object):
             self.dump('open_dir', dir)
             
             self.files = [name for name in os.listdir(dir) if name.endswith('.PDF')]
+            label = 'Files'
             if len(self.files) == 0:
                 self.files = ['Keine PDF Dateien gefunden']
-            
-            self.files = [name for name in self.files if name not in self.blacklist]
-            if len(self.files) == 0:
-                self.files = ['Bereits alle Dateien convertiert'] 
-            
-            self.create_drob_down('Directory Open', funk=self.open_file, label='Files', choices=self.files)
+                
+            self.create_drob_down(funk=self.open_file, label=label, choices=self.files)
             self.open_b.config(text=dir.split('/')[-1])
 
-    def create_drob_down(self, name, funk, choices, label=''):
+    def fetch_drop_down(self):
+        for var in self.data['tkvars'].values():
+            label = var.get()
+            if len(label) > 0:
+                if bool(int(label[-1])):
+                    filename = label[:-1]
+                    if filename not in self.checkt:
+                        self.checkt.append(filename)
+                        self.open_file(filename)
+                else:
+                    filename = label[:-1]
+                    if filename in self.checkt:
+                        self.checkt.remove(filename)
+                        for kto in self.ktos:
+                            if filename in kto.values():
+                                self.ktos.remove(kto)
+                                if len(self.ktos) == 0:
+                                    self.init_0()
+                                elif self.kto_i == len(self.ktos):
+                                    self.i = 0
+                                    self.kto_i -= 1
+                                    self.kto_count -= 1
+                                else:
+                                    self.kto_count -= 1
+                                self.show()
+
+    def create_drob_down(self, funk, choices, label=''):
         for ps in self.data['frame'].pack_slaves():
-            if 'option' in str(ps):
+            if 'menubutton' in str(ps):
                 ps.destroy()
-        self.data['tkvar'] = StringVar(self.data['frame'])
-        self.data['tkvar'].set(label)
-
-        popupMenu = OptionMenu(self.data['frame'], self.data['tkvar'], *choices)
-        popupMenu.pack(side=RIGHT, fill=BOTH, expand=YES)
-
-        self.data['tkvar'].trace('w', funk)
+        self.menbutton =  Menubutton (self.data['frame'], text=label, relief="raised")
+        self.menbutton.menu  =  Menu (self.menbutton, tearoff=0)
+        self.menbutton["menu"]  =  self.menbutton.menu
+        
+        for label in choices:
+            if label not in self.data['tkvars']:
+                self.data['tkvars'][label] = StringVar(self.data['frame'])
+            self.menbutton.menu.add_checkbutton(label=label, onvalue=label+'1', offvalue=label+'0', command=self.fetch_drop_down, variable=self.data['tkvars'][label], foreground='blue')
+            self.menbutton.pack(side=RIGHT, fill=BOTH, expand=YES)
+        
         self.data['frame'].pack(side=TOP, fill=BOTH, expand=YES)
 
     def remove_cursor(self, event=None):
         entry = self.root.focus_get()
-        p_name = entry.winfo_parent()
-        if p_name != '':
-            parent = entry._nametowidget(p_name)
+        if not entry is None:
+            p_name = entry.winfo_parent()
+            if p_name != '':
+                parent = entry._nametowidget(p_name)
 
-            pack_slaves = self.table_f.pack_slaves()
-            frame = pack_slaves[pack_slaves.index(parent)]
+                pack_slaves = self.table_f.pack_slaves()
+                frame = pack_slaves[pack_slaves.index(parent)]
 
-            pack_slaves = frame.pack_slaves()
-            ent = pack_slaves[pack_slaves.index(entry)]
+                pack_slaves = frame.pack_slaves()
+                ent = pack_slaves[pack_slaves.index(entry)]
 
-            self.fetch()
-            ent.destroy()
-            Entry(frame, text='').pack(side=LEFT)
+                self.fetch()
+                ent.destroy()
+                Entry(frame, text='').pack(side=LEFT)
 
-            self.show()
+                self.show()
 
     def run(self):
         if self.entries['open_dir'] == '/':
@@ -361,7 +387,7 @@ class gui(object):
         else:
             self.files = [name for name in os.listdir(self.entries['open_dir']) if name.endswith('.PDF')]
         
-        self.create_drob_down('Directory Open', funk=self.open_file, label='Files', choices=self.files)
+        self.create_drob_down(funk=self.open_file, label='Files', choices=self.files)
         
         self.build_table()
         
