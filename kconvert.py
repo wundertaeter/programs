@@ -160,6 +160,8 @@ class gui(object):
         self.i = 0
         self.kto_i = 0
         self.checkt = []
+        for label in self.data['tkvars'].keys():
+            self.data['tkvars'][label].set(0)
 
     def open_file(self, filename):
         kto = cv.convert(filename, self.entries['open_dir'])
