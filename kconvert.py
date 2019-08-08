@@ -82,7 +82,7 @@ class kto_ausz_Parser(object):
 # --------------------------------------------------------------------
 
 class converter(object):
-    def to_xlsx(self, filename, all_rows):
+    def to_xlsx(self, filename, ktos):
         wbRD = xlrd.open_workbook(filename)
         sheets = wbRD.sheets()
 
@@ -96,14 +96,14 @@ class converter(object):
         
         col = 0
         row_num = sheet.nrows
-
-        for rows in all_rows:
-            for row in rows:
-                for value in row:
-                    newSheet.write(row_num, col, value)
-                    col += 1
-                row_num += 1
-                col = 0
+        for kto in ktos:
+            for rows in kto['all_rows']:
+                for row in rows:
+                    for value in row:
+                        newSheet.write(row_num, col, value)
+                        col += 1
+                    row_num += 1
+                    col = 0
         
         wb.close()
 
@@ -116,9 +116,8 @@ class converter(object):
             for i in range(len(columns)):
                 worksheet.write(0, i, columns[i])
             workbook.close()
-
-        for kto in ktos:
-            self.to_xlsx(filename, kto['all_rows'])
+        
+            self.to_xlsx(filename, ktos)
 
     def convert(self, pdf_name, path):
         pdf_file = open(path + '/' + pdf_name, 'rb')
