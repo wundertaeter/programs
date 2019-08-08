@@ -117,7 +117,7 @@ class converter(object):
                 worksheet.write(0, i, columns[i])
             workbook.close()
         
-            self.to_xlsx(filename, ktos)
+        self.to_xlsx(filename, ktos)
 
     def convert(self, pdf_name, path):
         pdf_file = open(path + '/' + pdf_name, 'rb')
