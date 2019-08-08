@@ -288,11 +288,11 @@ class gui(object):
         
     def save_file(self):
         if len(self.ktos) > 0:
-            initdir = self.entries['save_file'].split('/')[:-1]
+            initdir = '/'.join(self.entries['save_file'].split('/')[:-1])
             initfile = self.entries['save_file'].split('/')[-1]
             filename = filedialog.asksaveasfilename(initialdir=initdir, initialfile=initfile, title = "Select file", defaultextension='.xlsx')
             if len(filename) > 0: 
-                self.dump('save_file', '/'.join(filename.split('/')))
+                self.dump('save_file', filename)
                 self.save_as_l.config(text=filename.split('/')[-1])
                 self.fetch()
                 cv.save_as(self.entries['save_file'], self.ktos)
