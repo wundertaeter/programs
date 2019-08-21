@@ -21,8 +21,10 @@ class NGROK (object):
             sleep(2)
             r = requests.get('http://127.0.0.1:4040/api/tunnels')
         
-        tunnels = r.json()['tunnels']
+        
         for i in range(5):
+            print('Try [{}]'.format(i))
+            tunnels = r.json()['tunnels']
             if len(tunnels) > 1:
                 url = tunnels[0]['public_url']
                 if 'https' in url:
@@ -32,8 +34,12 @@ class NGROK (object):
                 break
             else:
                 sleep(5)
-                print('Try [{}]'.format(i))
-                tunnels = requests.get('http://127.0.0.1:4040/api/tunnels').json()['tunnels']
+                r = requests.get('http://127.0.0.1:4040/api/tunnels')
+        
+        if self.url is None:
+            print('Timeout')
+        
+        return self.url
                  
 
     def kill(self):
