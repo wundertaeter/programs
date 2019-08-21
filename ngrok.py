@@ -5,6 +5,8 @@ import requests
 from time import sleep
 
 home = os.path.expanduser("~")
+
+#first download ngrok for your os 
 class NGROK (object):
     def __init__(self, path_to_ngrok=home):
         self.path_to_ngrok = path_to_ngrok
