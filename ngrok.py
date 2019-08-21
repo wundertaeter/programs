@@ -6,8 +6,8 @@ from time import sleep
 
 home = os.path.expanduser("~")
 class NGROK (object):
-    def __init__(self, path=home):
-        self.path_to_ngrok = path
+    def __init__(self, path_to_ngrok=home):
+        self.path_to_ngrok = path_to_ngrok
         self.ngrok = None
         self.url = None
 
