@@ -39,12 +39,12 @@ class NGROK (object):
         if self.url is None:
             print('Timeout')
         
-        return self.url
+        return self.url # your public url
                  
 
     def kill(self):
-        if self.ngrok is None:
-            print('ngrok still running!')
+        if self.ngrok is None: # ngrok was allready running so no new process was started
+            print('ngrok still running!') 
             exit()
         else:
             os.killpg(os.getpgid(self.ngrok.pid), signal.SIGTERM)
