@@ -170,10 +170,11 @@ class gui(object):
                 self.ktos = [kto]
             else:
                 date = datetime.strptime(kto['all_rows'][0][0][0], '%d.%m.%Y')
-                for i in range(len(self.ktos)):
-                    d = datetime.strptime(self.ktos[i]['all_rows'][0][0][0], '%d.%m.%Y')
-                    if date < d:
+                i = 0
+                for k in self.ktos:
+                    if date < datetime.strptime(k['all_rows'][0][0][0], '%d.%m.%Y'):
                         break
+                    i += 1
                 self.ktos.insert(i, kto)
             self.kto_count += 1
             self.show()
