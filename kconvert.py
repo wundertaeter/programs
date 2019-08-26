@@ -144,13 +144,13 @@ class gui(object):
     def __init__(self):
         self.root = Tk()
         self.root.resizable(0, 0)
-        self.root.title('Kontoauszug Converter')
+        self.root.title('Bank Statement Converter')
         self.data = {'frame': Frame(self.root), 'tkvars': {}}
         if os.path.exists('entries.json'):
             with open('entries.json', 'r', encoding='utf-8') as fp:
                 self.entries = json.load(fp)
         else:
-            self.entries = {'open_dir': '/', 'save_file': '/'}
+            self.entries = {'open_dir': '/', 'save_file': '/table.xlsx'}
         self.init_0()
 
     def init_0(self):
@@ -169,7 +169,12 @@ class gui(object):
             if self.kto_count == 0:
                 self.ktos = [kto]
             else:
-                self.ktos.append(kto)
+                date = datetime.strptime(kto['all_rows'][0][0][0], '%d.%m.%Y')
+                for i in range(len(self.ktos)):
+                    d = datetime.strptime(self.ktos[i]['all_rows'][0][0][0], '%d.%m.%Y')
+                    if date < d:
+                        break
+                self.ktos.insert(i, kto)
             self.kto_count += 1
             self.show()
     
